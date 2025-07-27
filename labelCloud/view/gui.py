@@ -193,6 +193,7 @@ class GUI(QtWidgets.QMainWindow):
         self.button_pick_bbox: QtWidgets.QPushButton
         self.button_span_bbox: QtWidgets.QPushButton
         self.button_save_label: QtWidgets.QPushButton
+        self.button_pick_point: QtWidgets.QPushButton
 
         # RIGHT PANEL
         self.label_list: QtWidgets.QListWidget
@@ -337,6 +338,12 @@ class GUI(QtWidgets.QMainWindow):
 
         # LABEL CONTROL
         self.button_pick_bbox.clicked.connect(
+            lambda: self.controller.drawing_mode.set_drawing_strategy(
+                PickingStrategy(self)
+            )
+        )
+        
+        self.button_pick_point.clicked.connect(
             lambda: self.controller.drawing_mode.set_drawing_strategy(
                 PickingStrategy(self)
             )
