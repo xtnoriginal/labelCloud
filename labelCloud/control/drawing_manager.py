@@ -3,15 +3,17 @@ from typing import TYPE_CHECKING, Union
 
 from ..labeling_strategies import BaseLabelingStrategy
 from .bbox_controller import BoundingBoxController
+from .point_controller import PointController
 
 if TYPE_CHECKING:
     from ..view.gui import GUI
 
 
 class DrawingManager(object):
-    def __init__(self, bbox_controller: BoundingBoxController) -> None:
+    def __init__(self, bbox_controller: BoundingBoxController, point_controller: PointController) -> None:
         self.view: "GUI"
         self.bbox_controller = bbox_controller
+        self.point_controller = point_controller
         self.drawing_strategy: Union[BaseLabelingStrategy, None] = None
 
     def set_view(self, view: "GUI") -> None:
@@ -48,13 +50,15 @@ class DrawingManager(object):
         if is_temporary:
             self.drawing_strategy.register_tmp_point(world_point)
         else:
-            self.drawing_strategy.register_point(world_point)
-            if (
-                self.drawing_strategy.is_bbox_finished()
-            ):  # Register bbox to bbox controller when finished
-                self.bbox_controller.add_bbox(self.drawing_strategy.get_bbox())
-                self.drawing_strategy.reset()
-                self.drawing_strategy = None
+            if self.drawing_strategy.__class__ == PointController:
+                print("Registering point in PointController")
+                self.drawing_strategy.register_point(world_point)
+            elif (
+                    self.drawing_strategy.is_bbox_finished()
+                ):  # Register bbox to bbox controller when finished
+                    self.bbox_controller.add_bbox(self.drawing_strategy.get_bbox())
+                    self.drawing_strategy.reset()
+                    self.drawing_strategy = None
 
     def draw_preview(self) -> None:
         if self.drawing_strategy is not None:

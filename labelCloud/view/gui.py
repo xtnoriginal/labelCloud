@@ -24,7 +24,7 @@ from ..control.config_manager import config
 from ..definitions import Color3f, LabelingMode
 from ..io.labels.config import LabelConfig
 from ..io.pointclouds import BasePointCloudHandler
-from ..labeling_strategies import PickingStrategy, SpanningStrategy
+from ..labeling_strategies import PickingStrategy, SpanningStrategy, PointPickingStrategy
 from ..model.point_cloud import PointCloud
 from .settings_dialog import SettingsDialog  # type: ignore
 from .startup.dialog import StartupDialog
@@ -190,6 +190,7 @@ class GUI(QtWidgets.QMainWindow):
         )
 
         # label mode selection
+        self.button_pick_point: QtWidgets.QPushButton
         self.button_pick_bbox: QtWidgets.QPushButton
         self.button_span_bbox: QtWidgets.QPushButton
         self.button_save_label: QtWidgets.QPushButton
@@ -341,6 +342,13 @@ class GUI(QtWidgets.QMainWindow):
                 PickingStrategy(self)
             )
         )
+        
+        self.button_pick_point.clicked.connect(
+            lambda: self.controller.drawing_mode.set_drawing_strategy(
+                PointPickingStrategy(self)
+            )
+        )
+        
         self.button_span_bbox.clicked.connect(
             lambda: self.controller.drawing_mode.set_drawing_strategy(
                 SpanningStrategy(self)
@@ -524,6 +532,26 @@ class GUI(QtWidgets.QMainWindow):
 
     def update_current_class_dropdown(self) -> None:
         self.controller.pcd_manager.populate_class_dropdown()
+        
+    
+    def update_point_stats(self, point3d) -> None:
+        '''
+        Update the point statistics in the GUI based on the provided Point3D object.
+        Args:
+            point3d (Point3D): The Point3D object containing the statistics to display.
+        '''
+        
+        # Todo: Add more statistics if needed
+        if point3d:
+            self.view.edit_pos_x.setText(str(round(point3d.x, 2)))
+            self.view.edit_pos_y.setText(str(round(point3d.y, 2)))
+            self.view.edit_pos_z.setText(str(round(point3d.z, 2)))
+            self.view.label_volume.setText(str(round(point3d.volume, 2)))
+        else:
+            self.view.edit_pos_x.clear()
+            self.view.edit_pos_y.clear()
+            self.view.edit_pos_z.clear()
+            self.view.label_volume.clear()
 
     def update_bbox_stats(self, bbox) -> None:
         viewing_precision = config.getint("USER_INTERFACE", "viewing_precision")
