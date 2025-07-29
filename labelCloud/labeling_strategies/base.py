@@ -30,9 +30,9 @@ class BaseLabelingStrategy(ABC):
     def register_scrolling(self, distance: float) -> None:
         pass
 
-    @abstractmethod
-    def get_bbox(self) -> "BBox":
-        raise NotImplementedError
+    # @abstractmethod
+    # def get_bbox(self) -> "BBox":
+    #     raise NotImplementedError
 
     def draw_preview(self) -> None:
         pass

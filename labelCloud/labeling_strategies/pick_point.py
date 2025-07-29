@@ -6,7 +6,7 @@ import numpy as np
 from . import BaseLabelingStrategy
 from ..control.config_manager import config
 from ..definitions import Mode, Point3D
-from ..model import BBox
+from ..model import Point
 from ..utils import math3d as math3d
 from ..utils import oglhelper as ogl
 import open3d as o3d
@@ -38,6 +38,7 @@ class PickingPointStrategy(BaseLabelingStrategy):
         self.pcd_tree.set_geometry(pcd)
 
     def register_point(self, new_point: Point3D) -> None:
+        print("register_point called with:", new_point)
         self.point_1 = new_point
         self.points_registered += 1
                                                                          
@@ -47,31 +48,20 @@ class PickingPointStrategy(BaseLabelingStrategy):
     def register_scrolling(self, distance: float) -> None:
         self.bbox_z_rotation += distance // 30
 
-    def draw_preview(self) -> None: 
-
-        
+    def draw_preview(self) -> None:  
         if not self.tmp_p1 == None :
             k, idx, dist= self.pcd_tree.search_knn_vector_3d(self.tmp_p1,1);
             if idx:
-                print(self.tmp_p1, self.point_1)
                 ogl.draw_points([self.view.controller.pcd_manager.pointcloud.points[idx[0]]], color=self.preview_color)
                                                     
 
     # Draw bbox with fixed dimensions and rotation at x,y in world space
-    def get_bbox(self) -> BBox:  # TODO: Refactor
+    def get_point(self) -> Point3D: 
         assert self.point_1 is not None
-        final_bbox = BBox(
-            *np.add(
-                self.point_1,
-                [
-                    0,
-                    config.getfloat("LABEL", "STD_BOUNDINGBOX_WIDTH") / 2,
-                    -config.getfloat("LABEL", "STD_BOUNDINGBOX_HEIGHT") / 3,
-                ],
-            )
-        )
-        final_bbox.set_z_rotation(self.bbox_z_rotation)
-        return final_bbox
+        return Point(self.point_1)
+    
+    def get_selected_point(self):
+        return self.point_1
 
     def reset(self) -> None:
         super().reset()

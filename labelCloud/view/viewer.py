@@ -14,6 +14,7 @@ from ..control.config_manager import config
 from ..control.drawing_manager import DrawingManager
 from ..control.pcd_manager import PointCloudManger
 from ..definitions.types import Color4f, Point2D
+from ..control.picked_point_controller import PickedPointController
 from ..utils import oglhelper
 
 
@@ -48,6 +49,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         self.pcd_manager: PointCloudManger = None  # type: ignore
         self.bbox_controller: BoundingBoxController = None  # type: ignore
+        self.picked_point_controller : PickedPointController =  None
 
         # Objects to be drawn
         self.crosshair_pos: Point2D = (0, 0)
@@ -61,6 +63,10 @@ class GLWidget(QtOpenGL.QGLWidget):
 
     def set_bbox_controller(self, bbox_controller: BoundingBoxController) -> None:
         self.bbox_controller = bbox_controller
+
+    
+    def set__picked_point_controller(self, picked_point_controller: PickedPointController) -> None:
+        self.picked_point_controller = picked_point_controller
 
     # QGLWIDGET METHODS
 
@@ -130,6 +136,14 @@ class GLWidget(QtOpenGL.QGLWidget):
         # Draw labeled bboxes
         for bbox in self.bbox_controller.bboxes:  # type: ignore
             bbox.draw_bbox()
+
+
+        if self.picked_point_controller.has_active_point():
+            self.picked_point_controller.get_point().draw_point(highlighted=True)
+        
+
+        for  point in self.picked_point_controller.points:
+            point.draw_point()
 
         GL.glPopMatrix()  # restore the previous modelview matrix
 

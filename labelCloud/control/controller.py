@@ -12,6 +12,7 @@ from ..utils import oglhelper
 from ..view.gui import GUI
 from .alignmode import AlignMode
 from .bbox_controller import BoundingBoxController
+from .picked_point_controller import PickedPointController
 from .config_manager import config
 from .drawing_manager import DrawingManager
 from .pcd_manager import PointCloudManger
@@ -25,9 +26,10 @@ class Controller:
         self.view: "GUI"
         self.pcd_manager = PointCloudManger()
         self.bbox_controller = BoundingBoxController()
+        self.picked_point_controller = PickedPointController()
 
         # Drawing states
-        self.drawing_mode = DrawingManager(self.bbox_controller)
+        self.drawing_mode = DrawingManager(self.bbox_controller, self.picked_point_controller)
         self.align_mode = AlignMode(self.pcd_manager)
 
         # Control states
@@ -48,6 +50,7 @@ class Controller:
         self.drawing_mode.set_view(self.view)
         self.align_mode.set_view(self.view)
         self.view.gl_widget.set_bbox_controller(self.bbox_controller)
+        self.view.gl_widget.set__picked_point_controller(self.picked_point_controller)
         self.bbox_controller.pcd_manager = self.pcd_manager
 
         # Read labels from folders
