@@ -127,3 +127,12 @@ class PickedPointController(object):
                 current_item.setSelected(True)
         self.view.label_list.blockSignals(False)
     
+
+
+    def update_curr_class(self) -> None:
+        if self.has_active_point():
+            self.view.current_class_dropdown.setCurrentText(
+                self.get_active_point().classname  # type: ignore
+            )
+        else:
+            self.view.controller.pcd_manager.populate_class_dropdown()
