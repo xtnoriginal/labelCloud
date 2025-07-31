@@ -539,6 +539,30 @@ class GUI(QtWidgets.QMainWindow):
 
     def update_current_class_dropdown(self) -> None:
         self.controller.pcd_manager.populate_class_dropdown()
+    
+    
+    def update_point_stats(self, bbox) -> None:
+        viewing_precision = config.getint("USER_INTERFACE", "viewing_precision")
+        # if bbox and not self.line_edited_activated():
+        #     self.edit_pos_x.setText(str(round(bbox.get_center()[0], viewing_precision)))
+        #     self.edit_pos_y.setText(str(round(bbox.get_center()[1], viewing_precision)))
+        #     self.edit_pos_z.setText(str(round(bbox.get_center()[2], viewing_precision)))
+
+        #     self.edit_length.setText(
+        #         str(round(bbox.get_dimensions()[0], viewing_precision))
+        #     )
+        #     self.edit_width.setText(
+        #         str(round(bbox.get_dimensions()[1], viewing_precision))
+        #     )
+        #     self.edit_height.setText(
+        #         str(round(bbox.get_dimensions()[2], viewing_precision))
+        #     )
+
+        #     self.edit_rot_x.setText(str(round(bbox.get_x_rotation(), 1)))
+        #     self.edit_rot_y.setText(str(round(bbox.get_y_rotation(), 1)))
+        #     self.edit_rot_z.setText(str(round(bbox.get_z_rotation(), 1)))
+
+        #     self.label_volume.setText(str(round(bbox.get_volume(), viewing_precision)))
 
     def update_bbox_stats(self, bbox) -> None:
         viewing_precision = config.getint("USER_INTERFACE", "viewing_precision")

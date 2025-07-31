@@ -18,11 +18,25 @@ DEVICE_PIXEL_RATIO: Optional[float] = (
 )
 
 
+def draw_point(
+    point: Point3D,
+    color: Color4f = (0, 1, 1, 1),
+    point_size: int = 10,
+) -> None:
+    GL.glColor4d(*color)
+    GL.glPointSize(point_size)
+    GL.glBegin(GL.GL_POINTS)
+    GL.glVertex3d(*point)
+    print(type(point))
+    GL.glEnd()
+
+
 def draw_points(
     points: Union[List[Point3D], npt.NDArray],
     color: Color4f = (0, 1, 1, 1),
     point_size: int = 10,
 ) -> None:
+    print(point_size)
     GL.glColor4d(*color)
     GL.glPointSize(point_size)
     GL.glBegin(GL.GL_POINTS)

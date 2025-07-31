@@ -139,7 +139,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
 
         if self.picked_point_controller.has_active_point():
-            self.picked_point_controller.get_point().draw_point(highlighted=True)
+            self.picked_point_controller.get_active_point().draw_point(highlighted=True)
         
 
         for  point in self.picked_point_controller.points:

@@ -44,7 +44,7 @@ class PickedPointController(object):
     """
 
     def __init__(self) -> None:
-        self.view = 'GUI'
+        self.view : GUI
         self.pcd_manager : PointCloudManger
         self.points :  List[Point] = []
         self.active_point_id = -1
@@ -72,15 +72,14 @@ class PickedPointController(object):
         """
         Get the currently picked point.
         """
-
         return self.point
 
     @has_active_bbox_decorator
     def get_classname(self) -> str:
-        return self.get_active_bbox().get_classname()
+        return self.get_active_point().get_classname()
     
-    def get_active_bbox(self) -> Optional[Point]:
-        if self.has_active_bbox():
+    def get_active_point(self) -> Optional[Point]:
+        if self.has_active_point():
             return self.points[self.active_point_id]
         else:
             return None
@@ -91,7 +90,7 @@ class PickedPointController(object):
         if 0 <= point_id < len(self.points):
             self.active_point_id = point_id
             self.update_all()
-            self.view.tatus_manager.update_status(
+            self.view.status_manager.update_status(
                 "Point sselected, it can now be corrected.", mode=Mode.CORRECTION
             )
         else:
@@ -102,12 +101,12 @@ class PickedPointController(object):
     
         self.update_curr_class()
         self.update_label_list()
-        self.view.update_point_stats(self.get_active_bbox())
+        self.view.update_point_stats(self.get_active_point())
     
     @has_active_bbox_decorator
     def update_z_dial(self) -> None:
         self.view.dial_bbox_z_rotation.blockSignals(True)  # To brake signal loop
-        self.view.dial_bbox_z_rotation.setValue(int(self.get_active_bbox().get_z_rotation()))  # type: ignore
+        self.view.dial_bbox_z_rotation.setValue(int(self.get_active_point().get_z_rotation()))  # type: ignore
         self.view.dial_bbox_z_rotation.blockSignals(False)
 
     def update_label_list(self) -> None:
@@ -130,6 +129,9 @@ class PickedPointController(object):
 
 
     def update_curr_class(self) -> None:
+        if self.view is None:
+            logging.error("View is not set yet. Cannot set active point.")
+            return
         if self.has_active_point():
             self.view.current_class_dropdown.setCurrentText(
                 self.get_active_point().classname  # type: ignore

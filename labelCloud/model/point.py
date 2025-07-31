@@ -27,7 +27,7 @@ class Point(object):
         self,
         point: Point3D
     ) -> None:
-        self.point: Point3D = Point
+        self.point: Point3D = [Point.]Point
     
         self.classname: str = LabelConfig().get_default_class_name()
 
@@ -35,6 +35,9 @@ class Point(object):
 
     def get_point(self) -> Point3D:
         return self.center
+    
+    def get_classname(self) -> str:
+        return self.classname
 
    
     # SETTERS
@@ -51,13 +54,9 @@ class Point(object):
         point_color = LabelConfig().get_class_color(self.classname)
         if highlighted:
             point_color = self.HIGHLIGHTED_COLOR
-
-
-        point_size: int = 10
+        print(type(self.point),self.point)
+        oglhelper.draw_points([self.point], color=Color3f.to_rgba(point_color))
+        GL.glPopMatrix()
         
-        GL.glColor4d(*self.point_color)
-        GL.glPointSize(point_size)
-        GL.glBegin(GL.GL_POINTS)
-        GL.glVertex3d(*self.point)
 
     

@@ -46,6 +46,7 @@ class Controller:
         """Sets the view in all controllers and dependent modules; Loads labels from file."""
         self.view = view
         self.bbox_controller.set_view(self.view)
+        self.picked_point_controller.set_view(self.view)
         self.pcd_manager.set_view(self.view)
         self.drawing_mode.set_view(self.view)
         self.align_mode.set_view(self.view)
