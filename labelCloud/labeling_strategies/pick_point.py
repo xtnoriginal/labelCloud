@@ -39,8 +39,11 @@ class PickingPointStrategy(BaseLabelingStrategy):
 
     def register_point(self, new_point: Point3D) -> None:
         print("register_point called with:", new_point)
-        self.point_1 = new_point
-        self.points_registered += 1
+        if not self.tmp_p1 == None :
+            k, idx, dist= self.pcd_tree.search_knn_vector_3d(new_point,1);
+            if idx:
+                self.point_1 = self.view.controller.pcd_manager.pointcloud.points[idx[0]]
+                self.points_registered += 1
                                                                          
     def register_tmp_point(self, new_tmp_point: Point3D) -> None:
         self.tmp_p1 = new_tmp_point

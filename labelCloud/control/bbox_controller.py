@@ -376,6 +376,7 @@ class BoundingBoxController(object):
         Should be always called if the bounding boxes changed.
         :return: None
         """
+    
         self.view.label_list.blockSignals(True)  # To brake signal loop
         self.view.label_list.clear()
         for bbox in self.bboxes:

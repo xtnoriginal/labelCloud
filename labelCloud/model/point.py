@@ -27,7 +27,7 @@ class Point(object):
         self,
         point: Point3D
     ) -> None:
-        self.point: Point3D = [Point.]Point
+        self.point: Point3D = point
     
         self.classname: str = LabelConfig().get_default_class_name()
 
@@ -54,7 +54,6 @@ class Point(object):
         point_color = LabelConfig().get_class_color(self.classname)
         if highlighted:
             point_color = self.HIGHLIGHTED_COLOR
-        print(type(self.point),self.point)
         oglhelper.draw_points([self.point], color=Color3f.to_rgba(point_color))
         GL.glPopMatrix()
         

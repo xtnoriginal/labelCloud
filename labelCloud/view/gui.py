@@ -196,6 +196,7 @@ class GUI(QtWidgets.QMainWindow):
         self.button_pick_point: QtWidgets.QPushButton
 
         # RIGHT PANEL
+        self.label_list_points: QtWidgets.QListWidget
         self.label_list: QtWidgets.QListWidget
         self.current_class_dropdown: QtWidgets.QComboBox
         self.button_deselect_label: QtWidgets.QPushButton
@@ -336,7 +337,21 @@ class GUI(QtWidgets.QMainWindow):
         # open_2D_img
         self.button_show_image.pressed.connect(lambda: self.show_2d_image())
 
-         # LABEL CONTROL
+        # LABEL CONTROL PICK POINT
+        self.current_class_dropdown.currentTextChanged.connect(
+            self.controller.picked_point_controller.set_classname
+        )
+        self.button_deselect_label.clicked.connect(
+            self.controller.picked_point_controller.deselect_point
+        )
+        self.button_delete_label.clicked.connect(
+            self.controller.picked_point_controller.delete_current_point
+        )
+        self.label_list.currentRowChanged.connect(
+            self.controller.picked_point_controller.set_active_point
+        )
+      
+
         self.button_pick_point.clicked.connect(
             lambda: self.controller.drawing_mode.set_drawing_strategy(
                 PickingPointStrategy(self)
@@ -428,6 +443,12 @@ class GUI(QtWidgets.QMainWindow):
         self.act_color_with_label.setChecked(
             config.getboolean("POINTCLOUD", "color_with_label")
         )
+
+    def handle_deselect():
+        if mode == "point":
+            self.controller.picked_point_controller.deselect_point()
+        elif mode == "bbox":
+            self.controller.bbox_controller.deselect_bbox()
 
     # Collect, filter and forward events to viewer
     def eventFilter(self, event_object, event) -> bool:

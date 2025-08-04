@@ -22,14 +22,14 @@ if TYPE_CHECKING:
     from ..view.gui import GUI
 
 
-def has_active_bbox_decorator(func):
+def has_active_point_decorator(func):
     """
     Only execute point manipulation if there is an active point.
     """
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if args[0].has_active_ppointpoint_1selPoint3D():
+        if args[0].has_active_point():
             return func(*args, **kwargs)
         else:
             logging.warning("There is currently no active point to manipulate.")
@@ -74,9 +74,6 @@ class PickedPointController(object):
         """
         return self.point
 
-    @has_active_bbox_decorator
-    def get_classname(self) -> str:
-        return self.get_active_point().get_classname()
     
     def get_active_point(self) -> Optional[Point]:
         if self.has_active_point():
@@ -103,7 +100,37 @@ class PickedPointController(object):
         self.update_label_list()
         self.view.update_point_stats(self.get_active_point())
     
-    @has_active_bbox_decorator
+
+    def delete_bbox(self, point_id: int) -> None:
+        if 0 <= point_id < len(self.points):
+            del self.points[point_id]
+            if point_id == self.active_point_id:
+                self.set_active_point(len(self.points) - 1)
+            else:
+                self.update_label_list()
+
+
+
+    def delete_current_point(self) -> None:
+        selected_item_id = self.view.label_list_points.currentRow()
+        self.delete_bbox(selected_item_id)
+
+
+    def deselect_point(self) -> None:
+        self.active_point_id = -1
+        self.update_all()
+        self.view.status_manager.set_mode(Mode.NAVIGATION)
+    
+    @has_active_point_decorator
+    def get_classname(self) -> str:
+        return self.get_active_point().get_classname()
+    
+    @has_active_point_decorator
+    def set_classname(self, new_class: str) -> None:
+        self.get_active_point().set_classname(new_class)  # type: ignore
+        self.update_label_list()
+    
+    @has_active_point_decorator
     def update_z_dial(self) -> None:
         self.view.dial_bbox_z_rotation.blockSignals(True)  # To brake signal loop
         self.view.dial_bbox_z_rotation.setValue(int(self.get_active_point().get_z_rotation()))  # type: ignore
@@ -115,16 +142,16 @@ class PickedPointController(object):
         Should be always called if the bounding boxes changed.
         :return: None
         """
-        self.view.label_list.blockSignals(True)  # To brake signal loop
-        self.view.label_list.clear()
+        self.view.label_list_points.blockSignals(True)  # To brake signal loop
+        self.view.label_list_points.clear()
         for point in self.points:
-            self.view.label_list.addItem(point.get_classname())
+            self.view.label_list_points.addItem(point.get_classname())
         if self.has_active_point():
-            self.view.label_list.setCurrentRow(self.active_point_id)
-            current_item = self.view.label_list.currentItem()
+            self.view.label_list_points.setCurrentRow(self.active_point_id)
+            current_item = self.view.label_list_points.currentItem()
             if current_item:
                 current_item.setSelected(True)
-        self.view.label_list.blockSignals(False)
+        self.view.label_list_points.blockSignals(False)
     
 
 
