@@ -8,6 +8,7 @@ import numpy as np
 from . import BaseLabelFormat
 from ...definitions import Point3D
 from ...model import BBox
+from ...model.point import Point
 from ...utils import math3d
 
 
@@ -16,6 +17,7 @@ class VerticesFormat(BaseLabelFormat):
 
     def import_labels(self, pcd_path: Path) -> List[BBox]:
         labels = []
+        points = []
 
         label_path = self.label_folder.joinpath(pcd_path.stem + self.FILE_ENDING)
         if label_path.is_file():
@@ -42,12 +44,20 @@ class VerticesFormat(BaseLabelFormat):
                 bbox.set_rotations(*rotations)
                 bbox.set_classname(label["name"])
                 labels.append(bbox)
+            
+
+            for point in data.get("points", []):
+                x = point["x"]
+                y = point["y"]
+                z = point["z"]
+                points.append(Point((x, y, z)))
+
             logging.info(
                 "Imported %s labels from %s." % (len(data["objects"]), label_path)
             )
-        return labels
+        return labels, points
 
-    def export_labels(self, bboxes: List[BBox], pcd_path: Path) -> None:
+    def export_labels(self, bboxes: List[BBox], points: List[Point], pcd_path: Path) -> None:
         data: Dict[str, Any] = dict()
         # Header
         data["folder"] = pcd_path.parent.name
@@ -63,6 +73,13 @@ class VerticesFormat(BaseLabelFormat):
                 bbox.get_vertices().tolist()
             )  # TODO: Add option for axis-aligned vertices
             data["objects"].append(label)
+
+
+        # Points
+        data["points"] = [
+            {"x": self.round_dec(p.point[0]), "y": self.round_dec(p.point[1]), "z": self.round_dec(p.point[2]), 'class': p.get_classname()} 
+            for p in points
+        ]
 
         # Save to JSON
         label_path = self.save_label_to_file(pcd_path, data)

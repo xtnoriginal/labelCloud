@@ -9,6 +9,7 @@ import numpy as np
 from ...model import BBox
 from .config import LabelConfig
 
+from ...model.point import Point
 
 class BaseLabelFormat(ABC):
     FILE_ENDING = ".json"
@@ -63,7 +64,7 @@ class BaseLabelFormat(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def export_labels(self, bboxes: List[BBox], pcd_path: Path) -> None:
+    def export_labels(self, bboxes: List[BBox], points: List[Point], pcd_path: Path) -> None:
         raise NotImplementedError
 
 

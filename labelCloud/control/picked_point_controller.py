@@ -16,6 +16,8 @@ from ..utils import oglhelper
 from .config_manager import config
 from .pcd_manager import PointCloudManger
 from ..model.point import Point
+import open3d as o3d
+from PyQt5 import QtWidgets, QtCore
 
 
 if TYPE_CHECKING:
@@ -82,6 +84,11 @@ class PickedPointController(object):
             return None
 
 
+    def set_points(self, points: List[Point]) -> None:
+        self.points = points
+        self.deselect_point()
+        self.update_label_list()
+
 
     def set_active_point(self, point_id: int) -> None:
         if 0 <= point_id < len(self.points):
@@ -91,7 +98,7 @@ class PickedPointController(object):
                 "Point sselected, it can now be corrected.", mode=Mode.CORRECTION
             )
         else:
-            self.deselect_bbox()
+            self.deselect_point()
 
     
     def update_all(self) -> None:
@@ -112,7 +119,7 @@ class PickedPointController(object):
 
 
     def delete_current_point(self) -> None:
-        selected_item_id = self.view.label_list_points.currentRow()
+        selected_item_id = self.view.label_list.currentRow()
         self.delete_bbox(selected_item_id)
 
 
@@ -136,23 +143,35 @@ class PickedPointController(object):
         self.view.dial_bbox_z_rotation.setValue(int(self.get_active_point().get_z_rotation()))  # type: ignore
         self.view.dial_bbox_z_rotation.blockSignals(False)
 
+    def update_label_list_2(self) -> None:
+        """Updates the list of drawn labels and highlights the active label.
+
+        Should be always called if the bounding boxes changed.
+        :return: None
+        """
+        self.view.label_list.blockSignals(True)  # To brake signal loop
+    
+        for i, point in enumerate(self.points):
+            item = QtWidgets.QListWidgetItem(f"[POINT] {point.get_classname()}")
+            item.setData(QtCore.Qt.UserRole, {"type": "point", "index": i})
+            self.view.label_list.addItem(item)
+
+        if self.has_active_point():
+            self.view.label_list.setCurrentRow(self.active_point_id)
+            current_item = self.view.label_list.currentItem()
+            if current_item:
+                current_item.setSelected(True)
+        self.view.label_list.blockSignals(False)
+    
+
+
     def update_label_list(self) -> None:
         """Updates the list of drawn labels and highlights the active label.
 
         Should be always called if the bounding boxes changed.
         :return: None
         """
-        self.view.label_list_points.blockSignals(True)  # To brake signal loop
-        self.view.label_list_points.clear()
-        for point in self.points:
-            self.view.label_list_points.addItem(point.get_classname())
-        if self.has_active_point():
-            self.view.label_list_points.setCurrentRow(self.active_point_id)
-            current_item = self.view.label_list_points.currentItem()
-            if current_item:
-                current_item.setSelected(True)
-        self.view.label_list_points.blockSignals(False)
-    
+        self.view.update_list()
 
 
     def update_curr_class(self) -> None:

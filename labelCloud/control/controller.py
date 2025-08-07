@@ -72,7 +72,10 @@ class Controller:
             previous_bboxes = self.bbox_controller.bboxes
             self.pcd_manager.get_next_pcd()
             self.reset()
-            self.bbox_controller.set_bboxes(self.pcd_manager.get_labels_from_file())
+            bbox , points = self.pcd_manager.get_labels_from_file()
+            self.bbox_controller.set_bboxes(bbox)
+            self.picked_point_controller.set_points(points)
+            print("Points loaded:", len(points))
 
             if not self.bbox_controller.bboxes and config.getboolean(
                 "LABEL", "propagate_labels"
@@ -100,7 +103,7 @@ class Controller:
     # CONTROL METHODS
     def save(self) -> None:
         """Saves all bounding boxes and optionally segmentation labels in the label file."""
-        self.pcd_manager.save_labels_into_file(self.bbox_controller.bboxes)
+        self.pcd_manager.save_labels_into_file(self.bbox_controller.bboxes, self.picked_point_controller.points)
 
         if LabelConfig().type == LabelingMode.SEMANTIC_SEGMENTATION:
             assert self.pcd_manager.pointcloud is not None

@@ -7,6 +7,8 @@ from ..io.labels.config import LabelConfig
 from ..model import BBox
 from .config_manager import config
 
+from ..model.point import Point
+
 
 def get_label_strategy(export_format: str, label_folder: Path) -> "BaseLabelFormat":
     if export_format == "vertices":
@@ -52,7 +54,7 @@ class LabelManager(object):
 
         self.label_strategy = get_label_strategy(strategy, self.label_folder)
 
-    def import_labels(self, pcd_path: Path) -> List[BBox]:
+    def import_labels(self, pcd_path: Path):
         try:
             return self.label_strategy.import_labels(pcd_path)
         except KeyError as key_error:
@@ -70,5 +72,5 @@ class LabelManager(object):
             )
             return []
 
-    def export_labels(self, pcd_path: Path, bboxes: List[BBox]) -> None:
-        self.label_strategy.export_labels(bboxes, pcd_path)
+    def export_labels(self, pcd_path: Path, bboxes: List[BBox], points: List[Point]) -> None:
+        self.label_strategy.export_labels(bboxes, points, pcd_path)

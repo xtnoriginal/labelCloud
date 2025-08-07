@@ -17,6 +17,9 @@ from ..utils import oglhelper
 from .config_manager import config
 from .pcd_manager import PointCloudManger
 
+import open3d as o3d
+from PyQt5 import QtCore, QtWidgets
+
 if TYPE_CHECKING:
     from ..view.gui import GUI
 
@@ -62,7 +65,7 @@ class BoundingBoxController(object):
         self.bboxes: List[BBox] = []
         self.active_bbox_id = -1  # -1 means zero bboxes
 
-    # GETTERS
+   
     def has_active_bbox(self) -> bool:
         return 0 <= self.active_bbox_id < len(self.bboxes)
 
@@ -369,6 +372,21 @@ class BoundingBoxController(object):
             )
         else:
             self.view.controller.pcd_manager.populate_class_dropdown()
+        
+    def update_label_list_2(self) -> None:
+        self.view.label_list.blockSignals(True)  # To brake signal loop
+        self.view.label_list.clear()
+        for i, bbox in enumerate(self.bboxes):
+            item = QtWidgets.QListWidgetItem(f"[BBOX] {bbox.get_classname()}")
+            item.setData(QtCore.Qt.UserRole, {"type": "bbox", "index": i})
+            self.view.label_list.addItem(item)
+    
+        if self.has_active_bbox():
+            self.view.label_list.setCurrentRow(self.active_bbox_id)
+            current_item = self.view.label_list.currentItem()
+            if current_item:
+                current_item.setSelected(True)
+        self.view.label_list.blockSignals(False)
 
     def update_label_list(self) -> None:
         """Updates the list of drawn labels and highlights the active label.
@@ -376,17 +394,8 @@ class BoundingBoxController(object):
         Should be always called if the bounding boxes changed.
         :return: None
         """
-    
-        self.view.label_list.blockSignals(True)  # To brake signal loop
-        self.view.label_list.clear()
-        for bbox in self.bboxes:
-            self.view.label_list.addItem(bbox.get_classname())
-        if self.has_active_bbox():
-            self.view.label_list.setCurrentRow(self.active_bbox_id)
-            current_item = self.view.label_list.currentItem()
-            if current_item:
-                current_item.setSelected(True)
-        self.view.label_list.blockSignals(False)
+        self.view.update_list()
+        
 
     def assign_point_label_in_active_box(self) -> None:
         box = self.get_active_bbox()

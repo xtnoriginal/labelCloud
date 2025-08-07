@@ -137,6 +137,9 @@ class GUI(QtWidgets.QMainWindow):
             )
         )
 
+        #Set State 
+        self.label_mode = "bbox"
+
         # MENU BAR
         # File
         self.act_set_pcd_folder: QtWidgets.QAction
@@ -196,7 +199,6 @@ class GUI(QtWidgets.QMainWindow):
         self.button_pick_point: QtWidgets.QPushButton
 
         # RIGHT PANEL
-        self.label_list_points: QtWidgets.QListWidget
         self.label_list: QtWidgets.QListWidget
         self.current_class_dropdown: QtWidgets.QComboBox
         self.button_deselect_label: QtWidgets.QPushButton
@@ -208,6 +210,12 @@ class GUI(QtWidgets.QMainWindow):
         self.act_change_class_color = QtWidgets.QAction("Change class color")
         self.act_delete_class = QtWidgets.QAction("Delete label")
         self.act_crop_pointcloud_inside = QtWidgets.QAction("Save points inside as")
+
+
+        self.act_point_change_class_color = QtWidgets.QAction("Change class color")
+        self.act_point_delete_class = QtWidgets.QAction("Delete label")
+
+      
         self.label_list.addActions(
             [
                 self.act_change_class_color,
@@ -269,6 +277,21 @@ class GUI(QtWidgets.QMainWindow):
         self.timer.setInterval(20)  # period, in milliseconds
         self.timer.timeout.connect(self.controller.loop_gui)
         self.timer.start()
+    
+    def update_list(self) -> None:
+        """Updates the list of drawn bounding boxes and highlights the active bounding box.
+
+        Should be always called if the bounding boxes changed.
+        :return: None
+        """
+        self.label_list.blockSignals(True)  # To brake signal loop
+        self.label_list.clear()    
+        self.label_list.blockSignals(False)  # To brake signal loop
+        self.controller.bbox_controller.update_label_list_2()
+        self.controller.picked_point_controller.update_label_list_2()
+        
+
+    # GETTERS
 
     # Event connectors
     def connect_events(self) -> None:
@@ -311,17 +334,18 @@ class GUI(QtWidgets.QMainWindow):
 
         # LABELING CONTROL
         self.current_class_dropdown.currentTextChanged.connect(
-            self.controller.bbox_controller.set_classname
+            self.set_classname
         )
         self.button_deselect_label.clicked.connect(
-            self.controller.bbox_controller.deselect_bbox
+            self.deselect_label
         )
         self.button_delete_label.clicked.connect(
-            self.controller.bbox_controller.delete_current_bbox
+            self.delete_label
         )
         self.label_list.currentRowChanged.connect(
-            self.controller.bbox_controller.set_active_bbox
+            self.on_label_selected
         )
+        
         self.button_assign_label.clicked.connect(
             self.controller.bbox_controller.assign_point_label_in_active_box
         )
@@ -337,19 +361,6 @@ class GUI(QtWidgets.QMainWindow):
         # open_2D_img
         self.button_show_image.pressed.connect(lambda: self.show_2d_image())
 
-        # LABEL CONTROL PICK POINT
-        self.current_class_dropdown.currentTextChanged.connect(
-            self.controller.picked_point_controller.set_classname
-        )
-        self.button_deselect_label.clicked.connect(
-            self.controller.picked_point_controller.deselect_point
-        )
-        self.button_delete_label.clicked.connect(
-            self.controller.picked_point_controller.delete_current_point
-        )
-        self.label_list.currentRowChanged.connect(
-            self.controller.picked_point_controller.set_active_point
-        )
       
 
         self.button_pick_point.clicked.connect(
@@ -427,6 +438,57 @@ class GUI(QtWidgets.QMainWindow):
         self.act_align_pcd.toggled.connect(self.controller.align_mode.change_activation)
         self.act_change_settings.triggered.connect(self.show_settings_dialog)
 
+    def set_classname(self, classname: str) -> None:
+        self.controller.bbox_controller.set_classname(classname)
+        self.controller.picked_point_controller.set_classname(classname)
+
+    def deselect_label(self):
+        if self.label_mode == "bbox":
+            self.controller.bbox_controller.deselect_bbox()
+        elif self.label_mode == "point":
+            self.controller.picked_point_controller.deselect_point()
+
+    def assign_label(self):
+        if self.label_mode == "bbox":
+            self.controller.bbox_controller.assign_point_label_in_active_box()
+        # if needed, you can add logic for points too
+
+    def set_active_label(self, index):
+        if self.label_mode == "bbox":
+            self.controller.picked_point_controller.deselect_point()
+            self.controller.bbox_controller.set_active_bbox(index)
+        elif self.label_mode == "point":
+            self.controller.picked_point_controller.set_active_point(index)
+            self.controller.bbox_controller.deselect_bbox()
+
+
+    def on_label_selected(self, row):
+        item = self.label_list.item(row)
+        if not item:
+            return
+
+        data = item.data(QtCore.Qt.UserRole)
+        if not data:
+            return
+        
+        print("on_label_selected called", {data["type"], data["index"]})
+
+        if data["type"] == "bbox":
+            self.label_mode = "bbox"
+            self.controller.picked_point_controller.deselect_point()
+            self.controller.bbox_controller.set_active_bbox(data["index"])
+
+        elif data["type"] == "point":
+            self.label_mode = "point"
+            self.controller.picked_point_controller.set_active_point(data["index"])
+            self.controller.bbox_controller.deselect_bbox()
+    def delete_label(self):
+        print("delete_label called", {self.label_mode})
+        if self.label_mode == "bbox":
+            self.controller.bbox_controller.delete_current_bbox()
+        else:
+            self.controller.picked_point_controller.delete_current_point()
+
     def set_checkbox_states(self) -> None:
         self.act_propagate_labels.setChecked(
             config.getboolean("LABEL", "propagate_labels")
@@ -444,11 +506,11 @@ class GUI(QtWidgets.QMainWindow):
             config.getboolean("POINTCLOUD", "color_with_label")
         )
 
-    def handle_deselect():
-        if mode == "point":
-            self.controller.picked_point_controller.deselect_point()
-        elif mode == "bbox":
-            self.controller.bbox_controller.deselect_bbox()
+    # def handle_deselect():
+    #     if mode == "point":
+    #         self.controller.picked_point_controller.deselect_point()
+    #     elif mode == "bbox":
+    #         self.controller.bbox_controller.deselect_bbox()
 
     # Collect, filter and forward events to viewer
     def eventFilter(self, event_object, event) -> bool:

@@ -20,6 +20,8 @@ from ..utils.logger import blue, green, print_column
 from .config_manager import config
 from .label_manager import LabelManager
 
+from ..model.point import Point
+
 if TYPE_CHECKING:
     from ..view.gui import GUI
 
@@ -144,10 +146,10 @@ class PointCloudManger(object):
         for label_class in LabelConfig().classes:
             self.view.current_class_dropdown.addItem(label_class.name)
 
-    def get_labels_from_file(self) -> List[BBox]:
-        bboxes = self.label_manager.import_labels(self.pcd_path)
+    def get_labels_from_file(self):
+        bboxes,points = self.label_manager.import_labels(self.pcd_path)
         logging.info(green("Loaded %s bboxes!" % len(bboxes)))
-        return bboxes
+        return bboxes, points
 
     # SETTER
     def set_view(self, view: "GUI") -> None:
@@ -157,9 +159,9 @@ class PointCloudManger(object):
             set(LabelConfig().get_classes().keys())
         )  # TODO: Move to better location
 
-    def save_labels_into_file(self, bboxes: List[BBox]) -> None:
+    def save_labels_into_file(self, bboxes: List[BBox], points:List[Point]) -> None:
         if self.pcds:
-            self.label_manager.export_labels(self.pcd_path, bboxes)
+            self.label_manager.export_labels(self.pcd_path, bboxes, points)
             self.collected_object_classes.update(
                 {bbox.get_classname() for bbox in bboxes}
             )

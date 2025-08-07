@@ -18,7 +18,7 @@
     ],
     "default": 2,
     "type": "object_detection",
-    "format": "vertices",
+    "format": "centroid_rel",
     "created_with": {
         "name": "labelCloud",
         "version": "1.1.1"

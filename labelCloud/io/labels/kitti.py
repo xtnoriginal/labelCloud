@@ -15,6 +15,7 @@ import numpy.typing as npt
 
 from ...control.config_manager import config
 from ...model import BBox
+from ...model.point import Point
 from . import BaseLabelFormat, abs2rel_rotation, rel2abs_rotation
 
 
@@ -75,7 +76,7 @@ class KittiFormat(BaseLabelFormat):
             lambda: TEMPLATE_META
         )  # id: meta
 
-    def import_labels(self, pcd_path: Path) -> List[BBox]:
+    def import_labels(self, pcd_path: Path):
         bboxes = []
 
         label_path = self.label_folder.joinpath(pcd_path.stem + self.FILE_ENDING)
@@ -135,9 +136,9 @@ class KittiFormat(BaseLabelFormat):
                 bboxes.append(bbox)
 
             logging.info("Imported %s labels from %s." % (len(label_lines), label_path))
-        return bboxes
+        return bboxes, []
 
-    def export_labels(self, bboxes: List[BBox], pcd_path: Path) -> None:
+    def export_labels(self, bboxes: List[BBox], points: List[Point], pcd_path: Path) -> None:
         data = str()
 
         # Labels
