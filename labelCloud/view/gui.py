@@ -482,6 +482,7 @@ class GUI(QtWidgets.QMainWindow):
             self.label_mode = "point"
             self.controller.picked_point_controller.set_active_point(data["index"])
             self.controller.bbox_controller.deselect_bbox()
+            
     def delete_label(self):
         print("delete_label called", {self.label_mode})
         if self.label_mode == "bbox":

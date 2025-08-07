@@ -714,7 +714,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>../icons/cursor-default-click.svg</normaloff>../icons/cursor-default-click.svg</iconset>
+          <normaloff>../icons/cursor-point.svg</normaloff>../icons/cursor-point.svg</iconset>
         </property>
         <property name="iconSize">
          <size>
