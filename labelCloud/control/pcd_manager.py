@@ -147,7 +147,15 @@ class PointCloudManger(object):
             self.view.current_class_dropdown.addItem(label_class.name)
 
     def get_labels_from_file(self):
-        bboxes,points = self.label_manager.import_labels(self.pcd_path)
+        #bboxes,points = self.label_manager.import_labels(self.pcd_path)
+        #TODO QUick fix to avoid error when no labels are present.Check source of error
+        
+        result = self.label_manager.import_labels(self.pcd_path)
+        if not result:
+            bboxes, points = [], []
+        else:
+            bboxes, points = result
+
         logging.info(green("Loaded %s bboxes!" % len(bboxes)))
         return bboxes, points
 

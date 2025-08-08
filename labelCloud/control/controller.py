@@ -91,8 +91,13 @@ class Controller:
         if self.pcd_manager.current_id > 0:
             self.pcd_manager.get_prev_pcd()
             self.reset()
-            self.bbox_controller.set_bboxes(self.pcd_manager.get_labels_from_file())
-            self.bbox_controller.set_active_bbox(0)
+
+            bbox , points = self.pcd_manager.get_labels_from_file()
+            self.bbox_controller.set_bboxes(bbox)
+            self.picked_point_controller.set_points(points)
+            print("Points loaded:", len(points))
+
+            
 
     def custom_pcd(self, custom: int) -> None:
         self.save()

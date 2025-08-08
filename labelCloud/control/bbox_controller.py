@@ -376,6 +376,8 @@ class BoundingBoxController(object):
     def update_label_list_2(self) -> None:
         self.view.label_list.blockSignals(True)  # To brake signal loop
         self.view.label_list.clear()
+
+        print(self.bboxes)
         for i, bbox in enumerate(self.bboxes):
             item = QtWidgets.QListWidgetItem(f"[BBOX] {bbox.get_classname()}")
             item.setData(QtCore.Qt.UserRole, {"type": "bbox", "index": i})
