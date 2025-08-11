@@ -178,9 +178,25 @@ class PickedPointController(object):
         if self.view is None:
             logging.error("View is not set yet. Cannot set active point.")
             return
+    
         if self.has_active_point():
             self.view.current_class_dropdown.setCurrentText(
                 self.get_active_point().classname  # type: ignore
             )
+
+            print(f"DEBUG ::: update_curr_class called{self.get_active_point().classname}")
         else:
             self.view.controller.pcd_manager.populate_class_dropdown()
+        
+    
+    def reset(self) -> None:
+        self.deselect_point()
+        self.set_points([])
+
+
+    @has_active_point_decorator
+    def assign_label_to_active_point(self) -> None:
+        point = self.get_active_point()
+        if point is not None:
+            self.pcd_manager.assign_label_to_point(point)
+

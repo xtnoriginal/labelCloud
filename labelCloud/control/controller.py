@@ -391,12 +391,43 @@ class Controller:
             self.view.status_manager.clear_message(Context.CONTROL_PRESSED)
 
     def crop_pointcloud_inside_active_bbox(self) -> None:
-        bbox = self.bbox_controller.get_active_bbox()
-        assert bbox is not None
-        assert self.pcd_manager.pointcloud is not None
-        points_inside = bbox.is_inside(self.pcd_manager.pointcloud.points)
-        pointcloud = self.pcd_manager.pointcloud.get_filtered_pointcloud(points_inside)
-        if pointcloud is None:
-            logging.warning("No points found inside the box. Ignored.")
-            return
-        self.view.save_point_cloud_as(pointcloud)
+
+        if self.picked_point_controller.has_active_point():
+            points = self.picked_point_controller.points
+            assert points is not None
+            assert self.pcd_manager.pointcloud is not None
+            print("DEBUG ::: Cropping point cloud inside active bbox")
+            pointcloud = self.points_to_point_cloud()
+
+            
+            if pointcloud is None:
+                logging.warning("No points found .")
+                return
+            self.view.save_point_cloud_as(pointcloud)
+
+        else:
+            bbox = self.bbox_controller.get_active_bbox()
+            assert bbox is not None
+            assert self.pcd_manager.pointcloud is not None
+            points_inside = bbox.is_inside(self.pcd_manager.pointcloud.points)
+            print(points_inside)
+            pointcloud = self.pcd_manager.pointcloud.get_filtered_pointcloud(points_inside)
+            if pointcloud is None:
+                logging.warning("No points found inside the box. Ignored.")
+                return
+            self.view.save_point_cloud_as(pointcloud)
+
+
+    def points_to_point_cloud(self) -> None:
+        """
+        Saves the points to a point cloud file.
+        """
+        #Save all selected points
+        selected_points = self.picked_point_controller.get_points()
+        if selected_points is None or len(selected_points) == 0:
+            logging.warning("No points selected. Cannot save to point cloud.")
+            return 
+        
+        points_dict  ={tuple(point.x, point.y, point.z) for point in selected_points}
+
+        return []

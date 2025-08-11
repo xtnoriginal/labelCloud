@@ -438,6 +438,14 @@ class GUI(QtWidgets.QMainWindow):
         self.act_align_pcd.toggled.connect(self.controller.align_mode.change_activation)
         self.act_change_settings.triggered.connect(self.show_settings_dialog)
 
+    
+    def save_points_to_point_cloud(self) -> None:
+
+        if self.label_mode == "bbox":
+            self.controller.bbox_controller.save_points_to_point_cloud()
+        else:
+            self.controller.picked_point_controller.save_points_to_point_cloud()
+
     def set_classname(self, classname: str) -> None:
         self.controller.bbox_controller.set_classname(classname)
         self.controller.picked_point_controller.set_classname(classname)
@@ -449,11 +457,15 @@ class GUI(QtWidgets.QMainWindow):
             self.controller.picked_point_controller.deselect_point()
 
     def assign_label(self):
+
+        print("assign_label called", {self.label_mode}) 
         if self.label_mode == "bbox":
             self.controller.bbox_controller.assign_point_label_in_active_box()
-        # if needed, you can add logic for points too
+    
 
     def set_active_label(self, index):
+        """Sets the active label based on the index in the label list."""  
+        
         if self.label_mode == "bbox":
             self.controller.picked_point_controller.deselect_point()
             self.controller.bbox_controller.set_active_bbox(index)
@@ -473,16 +485,20 @@ class GUI(QtWidgets.QMainWindow):
         
         print("on_label_selected called", {data["type"], data["index"]})
 
+        print("DEBUG ::: WHYY ",data["type"])
+
         if data["type"] == "bbox":
+          
             self.label_mode = "bbox"
             self.controller.picked_point_controller.deselect_point()
             self.controller.bbox_controller.set_active_bbox(data["index"])
 
         elif data["type"] == "point":
+            print("DEBUG ::: on_label_selected called POINT", {data["index"]})
             self.label_mode = "point"
             self.controller.picked_point_controller.set_active_point(data["index"])
             self.controller.bbox_controller.deselect_bbox()
-            
+
     def delete_label(self):
         print("delete_label called", {self.label_mode})
         if self.label_mode == "bbox":
@@ -507,11 +523,6 @@ class GUI(QtWidgets.QMainWindow):
             config.getboolean("POINTCLOUD", "color_with_label")
         )
 
-    # def handle_deselect():
-    #     if mode == "point":
-    #         self.controller.picked_point_controller.deselect_point()
-    #     elif mode == "bbox":
-    #         self.controller.bbox_controller.deselect_bbox()
 
     # Collect, filter and forward events to viewer
     def eventFilter(self, event_object, event) -> bool:
@@ -792,10 +803,27 @@ class GUI(QtWidgets.QMainWindow):
         self.input_pcd.setLabelText(f"Insert Point Cloud number: {pcd_path.name}")
 
     def change_label_color(self):
-        bbox = self.controller.bbox_controller.get_active_bbox()
-        LabelConfig().set_class_color(
-            bbox.classname, Color3f.from_qcolor(QColorDialog.getColor())
-        )
+        if self.label_mode == "point":
+            point = self.controller.picked_point_controller.get_active_point()
+            if point is None:
+                QMessageBox.warning(
+                    self, "No Active Point", "Please select a point to change its color."
+                )
+                return
+            LabelConfig().set_class_color(
+                point.classname, Color3f.from_qcolor(QColorDialog.getColor())
+            )
+        elif self.label_mode == "bbox":
+            if not self.controller.bbox_controller.has_active_bbox():
+                QMessageBox.warning(
+                    self, "No Active Bounding Box", "Please select a bounding box to change its color."
+                )
+                return
+                
+            bbox = self.controller.bbox_controller.get_active_bbox()
+            LabelConfig().set_class_color(
+                bbox.classname, Color3f.from_qcolor(QColorDialog.getColor())
+            )
 
     @staticmethod
     def save_point_cloud_as(pointcloud: PointCloud) -> None:
