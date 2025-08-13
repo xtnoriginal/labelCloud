@@ -391,14 +391,15 @@ class Controller:
             self.view.status_manager.clear_message(Context.CONTROL_PRESSED)
 
     def crop_pointcloud_inside_active_bbox(self) -> None:
-
         if self.picked_point_controller.has_active_point():
             points = self.picked_point_controller.points
             assert points is not None
             assert self.pcd_manager.pointcloud is not None
             print("DEBUG ::: Cropping point cloud inside active bbox")
-            pointcloud = self.points_to_point_cloud()
+            points_selected = self.points_to_point_cloud()
+            
 
+            pointcloud = self.pcd_manager.pointcloud.get_filtered_pointcloud(points_selected)
             
             if pointcloud is None:
                 logging.warning("No points found .")
@@ -411,6 +412,7 @@ class Controller:
             assert self.pcd_manager.pointcloud is not None
             points_inside = bbox.is_inside(self.pcd_manager.pointcloud.points)
             print(points_inside)
+            print(len(points_inside))
             pointcloud = self.pcd_manager.pointcloud.get_filtered_pointcloud(points_inside)
             if pointcloud is None:
                 logging.warning("No points found inside the box. Ignored.")
@@ -419,15 +421,28 @@ class Controller:
 
 
     def points_to_point_cloud(self) -> None:
-        """
-        Saves the points to a point cloud file.
-        """
-        #Save all selected points
-        selected_points = self.picked_point_controller.get_points()
-        if selected_points is None or len(selected_points) == 0:
+        """Saves the points to a point cloud file."""
+        selected_points = self.picked_point_controller.points
+        if not selected_points:
             logging.warning("No points selected. Cannot save to point cloud.")
-            return 
-        
-        points_dict  ={tuple(point.x, point.y, point.z) for point in selected_points}
+            return
 
-        return []
+        # Convert selected points to a NumPy array
+        selected_coords = np.array([point.point for point in selected_points])
+
+        print(f"DEBUG ::: Points to point cloud: {selected_coords.shape[0]} points selected")
+        print(f"DEBUG ::: {self.pcd_manager.pointcloud.points[:5]}")
+
+        # Check membership with tolerance
+        point_selected = [
+            any(np.allclose(pc_point, sel_point, atol=1e-6) for sel_point in selected_coords)
+            for pc_point in self.pcd_manager.pointcloud.points
+        ]
+
+        return point_selected
+    
+
+    def update_label_list(self) -> None:
+        """Updates the label list in the GUI."""
+        self.bbox_controller.update_label_list_2()
+        self.picked_point_controller.update_label_list_2()

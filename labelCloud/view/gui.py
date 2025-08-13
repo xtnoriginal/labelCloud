@@ -287,8 +287,7 @@ class GUI(QtWidgets.QMainWindow):
         self.label_list.blockSignals(True)  # To brake signal loop
         self.label_list.clear()    
         self.label_list.blockSignals(False)  # To brake signal loop
-        self.controller.bbox_controller.update_label_list_2()
-        self.controller.picked_point_controller.update_label_list_2()
+        self.controller.update_label_list()  # Update the list of labels
         
 
     # GETTERS
