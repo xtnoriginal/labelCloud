@@ -1,9 +1,9 @@
-import logging
+()()import logging
 import os
 import re
 import sys
 import traceback
-from pathlib import Path
+()from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Set
 
 import pkg_resources
@@ -26,7 +26,7 @@ from ..io.labels.config import LabelConfig
 from ..io.pointclouds import BasePointCloudHandler
 from ..labeling_strategies import PickingStrategy, SpanningStrategy, PickingPointStrategy
 from ..model.point_cloud import PointCloud
-from .settings_dialog import SettingsDialog  # type: ignore
+from .settings_dialog import SettingsDialog  # type: ignore()
 from .startup.dialog import StartupDialog
 from .status_manager import StatusManager
 from .viewer import GLWidget
@@ -360,6 +360,7 @@ class GUI(QtWidgets.QMainWindow):
         # open_2D_img
         self.button_show_image.pressed.connect(lambda: self.show_2d_image())
 
+        
       
 
         self.button_pick_point.clicked.connect(
@@ -480,11 +481,7 @@ class GUI(QtWidgets.QMainWindow):
 
         data = item.data(QtCore.Qt.UserRole)
         if not data:
-            return
-        
-        print("on_label_selected called", {data["type"], data["index"]})
-
-        print("DEBUG ::: WHYY ",data["type"])
+            return 
 
         if data["type"] == "bbox":
           
@@ -493,7 +490,6 @@ class GUI(QtWidgets.QMainWindow):
             self.controller.bbox_controller.set_active_bbox(data["index"])
 
         elif data["type"] == "point":
-            print("DEBUG ::: on_label_selected called POINT", {data["index"]})
             self.label_mode = "point"
             self.controller.picked_point_controller.set_active_point(data["index"])
             self.controller.bbox_controller.deselect_bbox()

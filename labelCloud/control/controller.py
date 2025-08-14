@@ -395,7 +395,7 @@ class Controller:
             points = self.picked_point_controller.points
             assert points is not None
             assert self.pcd_manager.pointcloud is not None
-            print("DEBUG ::: Cropping point cloud inside active bbox")
+            
             points_selected = self.points_to_point_cloud()
             
 
@@ -430,9 +430,6 @@ class Controller:
         # Convert selected points to a NumPy array
         selected_coords = np.array([point.point for point in selected_points])
 
-        print(f"DEBUG ::: Points to point cloud: {selected_coords.shape[0]} points selected")
-        print(f"DEBUG ::: {self.pcd_manager.pointcloud.points[:5]}")
-
         # Check membership with tolerance
         point_selected = [
             any(np.allclose(pc_point, sel_point, atol=1e-6) for sel_point in selected_coords)
@@ -446,3 +443,12 @@ class Controller:
         """Updates the label list in the GUI."""
         self.bbox_controller.update_label_list_2()
         self.picked_point_controller.update_label_list_2()
+
+
+    
+    def deselect(self):
+        '''
+        '''
+
+        self.bbox_controller.deselect_bbox()
+        self.picked_point_controller.deselect_point()

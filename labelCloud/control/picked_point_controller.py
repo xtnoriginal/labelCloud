@@ -156,11 +156,11 @@ class PickedPointController(object):
             item.setData(QtCore.Qt.UserRole, {"type": "point", "index": i})
             self.view.label_list.addItem(item)
 
-        if self.has_active_point():
-            self.view.label_list.setCurrentRow(self.active_point_id)
-            current_item = self.view.label_list.currentItem()
-            if current_item:
-                current_item.setSelected(True)
+        # if self.has_active_point():
+        #     self.view.label_list.setCurrentRow(self.active_point_id)
+        #     current_item = self.view.label_list.currentItem()
+        #     if current_item:
+        #         current_item.setSelected(True)
         self.view.label_list.blockSignals(False)
     
 

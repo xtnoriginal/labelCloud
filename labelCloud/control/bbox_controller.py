@@ -142,7 +142,7 @@ class BoundingBoxController(object):
 
     def deselect_bbox(self) -> None:
         self.active_bbox_id = -1
-        self.update_all()
+        #self.update_all()
         self.view.status_manager.set_mode(Mode.NAVIGATION)
 
     # MANIPULATORS
@@ -382,11 +382,11 @@ class BoundingBoxController(object):
             item.setData(QtCore.Qt.UserRole, {"type": "bbox", "index": i})
             self.view.label_list.addItem(item)
     
-        if self.has_active_bbox():
-            self.view.label_list.setCurrentRow(self.active_bbox_id)
-            current_item = self.view.label_list.currentItem()
-            if current_item:
-                current_item.setSelected(True)
+        # if self.has_active_bbox():
+        #     self.view.label_list.setCurrentRow(self.active_bbox_id)
+        #     current_item = self.view.label_list.currentItem()
+        #     if current_item:
+        #         current_item.setSelected(True)
         self.view.label_list.blockSignals(False)
 
     def update_label_list(self) -> None:
