@@ -17,6 +17,9 @@ from ..utils import oglhelper
 from .config_manager import config
 from .pcd_manager import PointCloudManger
 
+
+from .unified_annotation_controller import UnifiedAnnotationController
+
 if TYPE_CHECKING:
     from ..view.gui import GUI
 
@@ -61,6 +64,7 @@ class BoundingBoxController(object):
         self.pcd_manager: PointCloudManger
         self.bboxes: List[BBox] = []
         self.active_bbox_id = -1  # -1 means zero bboxes
+        self.unified_annotation_controller: UnifiedAnnotationController
 
     # GETTERS
     def has_active_bbox(self) -> bool:

@@ -15,6 +15,7 @@ from .bbox_controller import BoundingBoxController
 from .config_manager import config
 from .drawing_manager import DrawingManager
 from .pcd_manager import PointCloudManger
+from .unified_annotation_controller import UnifiedAnnotationController
 
 
 class Controller:
@@ -24,7 +25,8 @@ class Controller:
         """Initializes all controllers and managers."""
         self.view: "GUI"
         self.pcd_manager = PointCloudManger()
-        self.bbox_controller = BoundingBoxController()
+        self.unified_annotation_controller = UnifiedAnnotationController()
+        self.bbox_controller = BoundingBoxController(self.unified_annotation_controller)
 
         # Drawing states
         self.drawing_mode = DrawingManager(self.bbox_controller)
@@ -49,6 +51,8 @@ class Controller:
         self.align_mode.set_view(self.view)
         self.view.gl_widget.set_bbox_controller(self.bbox_controller)
         self.bbox_controller.pcd_manager = self.pcd_manager
+        self.bbox_controller.unified_annotation_controller = self.unified_annotation_controller
+        #TODO : Add to point list controller
 
         # Read labels from folders
         self.pcd_manager.read_pointcloud_folder()
