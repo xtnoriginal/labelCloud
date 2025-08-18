@@ -12,6 +12,7 @@ from ..utils import oglhelper
 from ..view.gui import GUI
 from .alignmode import AlignMode
 from .bbox_controller import BoundingBoxController
+from .pick_point_controller import PickPointController
 from .config_manager import config
 from .drawing_manager import DrawingManager
 from .pcd_manager import PointCloudManger
@@ -26,10 +27,11 @@ class Controller:
         self.view: "GUI"
         self.pcd_manager = PointCloudManger()
         self.unified_annotation_controller = UnifiedAnnotationController()
-        self.bbox_controller = BoundingBoxController(self.unified_annotation_controller)
+        self.bbox_controller = BoundingBoxController()
+        self.pick_point_controller = PickPointController()
 
         # Drawing states
-        self.drawing_mode = DrawingManager(self.bbox_controller)
+        self.drawing_mode = DrawingManager(self.bbox_controller,self.pick_point_controller)
         self.align_mode = AlignMode(self.pcd_manager)
 
         # Control states
@@ -46,13 +48,17 @@ class Controller:
         """Sets the view in all controllers and dependent modules; Loads labels from file."""
         self.view = view
         self.bbox_controller.set_view(self.view)
+        self.pick_point_controller.set_view(self.view)
         self.pcd_manager.set_view(self.view)
         self.drawing_mode.set_view(self.view)
         self.align_mode.set_view(self.view)
         self.view.gl_widget.set_bbox_controller(self.bbox_controller)
+        self.view.gl_widget.set_unified_annotation_controller(self.unified_annotation_controller)
         self.bbox_controller.pcd_manager = self.pcd_manager
         self.bbox_controller.unified_annotation_controller = self.unified_annotation_controller
-        #TODO : Add to point list controller
+        self.pick_point_controller.unified_annotation_controller = self.unified_annotation_controller
+        self.unified_annotation_controller.set_view(self.view)
+
 
         # Read labels from folders
         self.pcd_manager.read_pointcloud_folder()

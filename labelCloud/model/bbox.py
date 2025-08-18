@@ -158,7 +158,7 @@ class BBox(object):
         )
 
     # Draw the BBox using verticies
-    def draw_bbox(self, highlighted: bool = False) -> None:
+    def draw(self, highlighted: bool = False) -> None:
         self.set_axis_aligned_verticies()
 
         GL.glPushMatrix()

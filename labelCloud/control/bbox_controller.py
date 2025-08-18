@@ -87,7 +87,10 @@ class BoundingBoxController(object):
 
     def add_bbox(self, bbox: BBox) -> None:
         if isinstance(bbox, BBox):
-            self.bboxes.append(bbox)
+            self.bboxes.append(bbox) #TODO REMOVE THIS
+            
+            self.unified_annotation_controller.add_item(bbox)
+
             self.set_active_bbox(self.bboxes.index(bbox))
             self.view.current_class_dropdown.setCurrentText(
                 self.get_active_bbox().classname  # type: ignore
@@ -380,16 +383,7 @@ class BoundingBoxController(object):
         Should be always called if the bounding boxes changed.
         :return: None
         """
-        self.view.label_list.blockSignals(True)  # To brake signal loop
-        self.view.label_list.clear()
-        for bbox in self.bboxes:
-            self.view.label_list.addItem(bbox.get_classname())
-        if self.has_active_bbox():
-            self.view.label_list.setCurrentRow(self.active_bbox_id)
-            current_item = self.view.label_list.currentItem()
-            if current_item:
-                current_item.setSelected(True)
-        self.view.label_list.blockSignals(False)
+        self.unified_annotation_controller.update_label_list()
 
     def assign_point_label_in_active_box(self) -> None:
         box = self.get_active_bbox()

@@ -24,7 +24,7 @@ from ..control.config_manager import config
 from ..definitions import Color3f, LabelingMode
 from ..io.labels.config import LabelConfig
 from ..io.pointclouds import BasePointCloudHandler
-from ..labeling_strategies import PickingStrategy, SpanningStrategy
+from ..labeling_strategies import PickingStrategy, SpanningStrategy, PickingPointStrategy
 from ..model.point_cloud import PointCloud
 from .settings_dialog import SettingsDialog  # type: ignore
 from .startup.dialog import StartupDialog
@@ -193,6 +193,7 @@ class GUI(QtWidgets.QMainWindow):
         self.button_pick_bbox: QtWidgets.QPushButton
         self.button_span_bbox: QtWidgets.QPushButton
         self.button_save_label: QtWidgets.QPushButton
+        self.button_pick_point: QtWidgets.QPushButton
 
         # RIGHT PANEL
         self.label_list: QtWidgets.QListWidget
@@ -341,6 +342,14 @@ class GUI(QtWidgets.QMainWindow):
                 PickingStrategy(self)
             )
         )
+
+        # LABEL CONTROL
+        self.button_pick_point.clicked.connect(
+            lambda: self.controller.drawing_mode.set_drawing_strategy(
+                PickingPointStrategy(self)
+            )
+        )
+
         self.button_span_bbox.clicked.connect(
             lambda: self.controller.drawing_mode.set_drawing_strategy(
                 SpanningStrategy(self)
@@ -588,6 +597,7 @@ class GUI(QtWidgets.QMainWindow):
     def activate_draw_modes(self, state: bool) -> None:
         self.button_pick_bbox.setEnabled(state)
         self.button_span_bbox.setEnabled(state)
+        self.button_pick_point.setEnabled(state)
 
     def line_edited_activated(self) -> bool:
         for line_edit in self.all_line_edits:

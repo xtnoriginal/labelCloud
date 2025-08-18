@@ -9,13 +9,15 @@ from OpenGL import GLU
 from PyQt5 import QtGui, QtOpenGL
 
 from ..control.alignmode import AlignMode
-from ..control.bbox_controller import BoundingBoxController
+from ..control.unified_annotation_controller import UnifiedAnnotationController
 from ..control.config_manager import config
 from ..control.drawing_manager import DrawingManager
 from ..control.pcd_manager import PointCloudManger
 from ..definitions.types import Color4f, Point2D
 from ..utils import oglhelper
 
+from ..model.bbox import BBox
+from ..model.point import Point
 
 @contextmanager
 def ignore_depth_mask():
@@ -48,6 +50,7 @@ class GLWidget(QtOpenGL.QGLWidget):
 
         self.pcd_manager: PointCloudManger = None  # type: ignore
         self.bbox_controller: BoundingBoxController = None  # type: ignore
+        self.unified_annotation_controller: UnifiedAnnotationController = None
 
         # Objects to be drawn
         self.crosshair_pos: Point2D = (0, 0)
@@ -59,8 +62,10 @@ class GLWidget(QtOpenGL.QGLWidget):
     def set_pointcloud_controller(self, pcd_manager: PointCloudManger) -> None:
         self.pcd_manager = pcd_manager
 
-    def set_bbox_controller(self, bbox_controller: BoundingBoxController) -> None:
-        self.bbox_controller = bbox_controller
+
+    def set_unified_annotation_controller(self, unified_annotation_controller: UnifiedAnnotationController ):
+        self.unified_annotation_controller = unified_annotation_controller
+
 
     # QGLWIDGET METHODS
 
@@ -121,15 +126,17 @@ class GLWidget(QtOpenGL.QGLWidget):
                     self.selected_side_vertices, color=(0, 1, 0, 0.3)
                 )
 
-        # Draw active bbox
-        if self.bbox_controller.has_active_bbox():
-            self.bbox_controller.get_active_bbox().draw_bbox(highlighted=True)  # type: ignore
-            if config.getboolean("USER_INTERFACE", "show_orientation"):
-                self.bbox_controller.get_active_bbox().draw_orientation()  # type: ignore
 
-        # Draw labeled bboxes
-        for bbox in self.bbox_controller.bboxes:  # type: ignore
-            bbox.draw_bbox()
+
+        if self.unified_annotation_controller.has_active_item():
+            self.unified_annotation_controller.get_active_item().draw(highlighted=True) 
+
+            if config.getboolean("USER_INTERFACE", "show_orientation") and isinstance(self.unified_annotation_controller.get_active_item(), BBox):
+                self.unified_annotation_controller.get_active_item().draw_orientation()
+
+
+        for label in  self.unified_annotation_controller.items:
+            label.draw()
 
         GL.glPopMatrix()  # restore the previous modelview matrix
 
