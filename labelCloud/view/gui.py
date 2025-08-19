@@ -102,6 +102,20 @@ STYLESHEET = """
         background: url("{icons_dir}/cube-outline_white.svg") center left no-repeat, #0000ff;
     }}
 
+     QListWidget#label_list_point::item {{
+        padding-left: 22px;
+        padding-top: 7px;
+        padding-bottom: 7px;
+        background: url("{icons_dir}/circle-medium.svg") center left no-repeat;
+    }}
+
+    QListWidget#label_list_point::item:selected {{
+        color: #FFF;
+        border: none;
+        background: rgb(0, 0, 255);
+        background: url("{icons_dir}/circle-medium.svg") center left no-repeat, #0000ff;
+    }}
+
     QComboBox#current_class_dropdown::item:checked{{
         color: gray;
     }}

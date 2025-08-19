@@ -210,7 +210,7 @@ class BoundingBoxController(object):
             self.unified_annotation_controller.get_active_item().set_z_rotation(  # type: ignore
                 self.unified_annotation_controller.get_z_rotation() + dangle  # type: ignore
             )
-        self.unified_annotation_controller.update_all()
+        self.view.controller.update_all()
 
     @has_active_bbox_decorator
     def rotate_with_mouse(
@@ -289,7 +289,7 @@ class BoundingBoxController(object):
         new_width = new_length * width_length_ratio
         new_height = new_length * height_length_ratio
 
-        self.unified_annotation_controller.get_active_bbox().set_dimensions(new_length, new_width, new_height)  # type: ignore
+        self.unified_annotation_controller.get_active_item().set_dimensions(new_length, new_width, new_height)  # type: ignore
 
     @has_active_bbox_decorator
     def scale_along_length(
@@ -334,7 +334,7 @@ class BoundingBoxController(object):
         intersected_bbox_id = oglhelper.get_intersected_bboxes(
             x,
             y,
-            self.bboxes,
+            self.unified_annotation_controller.items,
             self.view.gl_widget.modelview,
             self.view.gl_widget.projection,
         )

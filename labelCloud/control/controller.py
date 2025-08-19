@@ -394,20 +394,20 @@ class Controller:
     def select_relative_class(self, step: int):
         if step == 0:
             return
-        curr_class = self.bbox_controller.get_active_bbox().get_classname()  # type: ignore
+        curr_class = self.unified_annotation_controller.get_active_item().get_classname()  # type: ignore
         new_class = LabelConfig().get_relative_class(curr_class, step)
-        self.bbox_controller.get_active_bbox().set_classname(new_class)  # type: ignore
-        self.bbox_controller.update_all()  # updates UI in SelectBox
+        self.unified_annotation_controller.get_active_item().set_classname(new_class)  # type: ignore
+        self.update_all()  # updates UI in SelectBox
 
     def select_relative_bbox(self, step: int):
         if step == 0:
             return
-        max_id = len(self.bbox_controller.bboxes) - 1
-        curr_id = self.bbox_controller.active_bbox_id
+        max_id = len(self.unified_annotation_controller.items) - 1
+        curr_id = self.unified_annotation_controller.active_index
         new_id = curr_id + step
         corner_case_id = 0 if step > 0 else max_id
         new_id = new_id if new_id in range(max_id + 1) else corner_case_id
-        self.bbox_controller.set_active_bbox(new_id)
+        self.unified_annotation_controller.set_active_item(new_id)
 
     def key_release_event(self, a0: QtGui.QKeyEvent) -> None:
         """Triggers actions when the user releases a key."""
