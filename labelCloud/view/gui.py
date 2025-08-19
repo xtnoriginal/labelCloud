@@ -31,7 +31,7 @@ from .startup.dialog import StartupDialog
 from .status_manager import StatusManager
 from .viewer import GLWidget
 
-from ..model.bbox import BBox
+from ..model import BBox, Point
 
 if TYPE_CHECKING:
     from ..control.controller import Controller
@@ -434,7 +434,7 @@ class GUI(QtWidgets.QMainWindow):
             self.label_list,  # otherwise steals focus for keyboard shortcuts
         ]:
             self.controller.key_press_event(event)
-            self.update_bbox_stats(self.controller.bbox_controller.get_active_bbox())
+            self.update_bbox_stats(self.controller.unified_annotation_controller.get_active_item())
             return True  # TODO: Recheck pyqt behaviour
         elif event.type() == QEvent.KeyRelease:
             self.controller.key_release_event(event)
@@ -442,10 +442,10 @@ class GUI(QtWidgets.QMainWindow):
         # Mouse Events
         elif (event.type() == QEvent.MouseMove) and (event_object == self.gl_widget):
             self.controller.mouse_move_event(event)
-            self.update_bbox_stats(self.controller.bbox_controller.get_active_bbox())
+            self.update_bbox_stats(self.controller.unified_annotation_controller.get_active_item())
         elif (event.type() == QEvent.Wheel) and (event_object == self.gl_widget):
             self.controller.mouse_scroll_event(event)
-            self.update_bbox_stats(self.controller.bbox_controller.get_active_bbox())
+            self.update_bbox_stats(self.controller.unified_annotation_controller.get_active_item())
         elif event.type() == QEvent.MouseButtonDblClick and (
             event_object == self.gl_widget
         ):
@@ -455,12 +455,12 @@ class GUI(QtWidgets.QMainWindow):
             event_object == self.gl_widget
         ):
             self.controller.mouse_clicked(event)
-            self.update_bbox_stats(self.controller.bbox_controller.get_active_bbox())
+            self.update_bbox_stats(self.controller.unified_annotation_controller.get_active_item())
         elif (event.type() == QEvent.MouseButtonPress) and (
             event_object != self.current_class_dropdown
         ):
             self.current_class_dropdown.clearFocus()
-            self.update_bbox_stats(self.controller.bbox_controller.get_active_bbox())
+            self.update_bbox_stats(self.controller.unified_annotation_controller.get_active_item())
         return False
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
@@ -537,9 +537,11 @@ class GUI(QtWidgets.QMainWindow):
     def update_current_class_dropdown(self) -> None:
         self.controller.pcd_manager.populate_class_dropdown()
 
-    def update_bbox_stats(self, bbox) -> None:
+    def update_bbox_stats(self, label) -> None:
         viewing_precision = config.getint("USER_INTERFACE", "viewing_precision")
-        if bbox and not self.line_edited_activated() and  isinstance(bbox, BBox):
+
+        if label and not self.line_edited_activated() and  isinstance(label, BBox):
+            bbox: BBox = label
             self.edit_pos_x.setText(str(round(bbox.get_center()[0], viewing_precision)))
             self.edit_pos_y.setText(str(round(bbox.get_center()[1], viewing_precision)))
             self.edit_pos_z.setText(str(round(bbox.get_center()[2], viewing_precision)))
@@ -559,6 +561,22 @@ class GUI(QtWidgets.QMainWindow):
             self.edit_rot_z.setText(str(round(bbox.get_z_rotation(), 1)))
 
             self.label_volume.setText(str(round(bbox.get_volume(), viewing_precision)))
+        elif isinstance(label, Point):
+            point: Point = label
+            self.edit_pos_x.setText(str(round(point.get_coords()[0], viewing_precision)))
+            self.edit_pos_y.setText(str(round(point.get_coords()[1], viewing_precision)))
+            self.edit_pos_z.setText(str(round(point.get_coords()[2], viewing_precision)))
+
+            self.edit_length.setText("")
+            self.edit_width.setText("")
+            self.edit_height.setText("")
+
+            self.edit_rot_x.setText("")
+            self.edit_rot_y.setText("")
+            self.edit_rot_z.setText("")
+
+            self.label_volume.setText("N/A")
+            
 
     def update_bbox_parameter(self, parameter: str) -> None:
         str_value = None

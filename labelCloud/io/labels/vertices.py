@@ -45,7 +45,8 @@ class VerticesFormat(BaseLabelFormat):
 
                 elif "point" in label:  # Point
                     x, y, z = label["point"]
-                    point = Point(x, y, z, classname=label["name"])
+                    point = Point((x, y, z))
+                    point.set_classname(label["name"])
                     labels.append(point)
 
             logging.info(

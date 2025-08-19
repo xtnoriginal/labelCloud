@@ -18,6 +18,8 @@ from .drawing_manager import DrawingManager
 from .pcd_manager import PointCloudManger
 from .unified_annotation_controller import UnifiedAnnotationController
 
+from ..model.bbox import BBox
+
 from ..definitions import Mode
 
 class Controller:
@@ -53,7 +55,6 @@ class Controller:
         self.pcd_manager.set_view(self.view)
         self.drawing_mode.set_view(self.view)
         self.align_mode.set_view(self.view)
-        #self.view.gl_widget.set_bbox_controller(self.bbox_controller)
         self.view.gl_widget.set_unified_annotation_controller(self.unified_annotation_controller)
         self.bbox_controller.pcd_manager = self.pcd_manager
         self.bbox_controller.unified_annotation_controller = self.unified_annotation_controller
@@ -82,13 +83,14 @@ class Controller:
             #self.bbox_controller.set_bboxes(self.pcd_manager.get_labels_from_file())
 
             self.unified_annotation_controller.set_items(self.pcd_manager.get_labels_from_file())
-            
+            self.update_curr_class()
 
             if not self.unified_annotation_controller.items and config.getboolean(
                 "LABEL", "propagate_labels"
             ):
                 self.bbox_controller.set_bboxes(previous_unified_bbox_point)
             self.unified_annotation_controller.set_active_item(0)
+           
         else:
             self.view.update_progress(len(self.pcd_manager.pcds))
             self.view.button_next_pcd.setEnabled(False)
@@ -102,12 +104,14 @@ class Controller:
             # self.bbox_controller.set_active_bbox(0)
             self.unified_annotation_controller.set_items(self.pcd_manager.get_labels_from_file())
             self.unified_annotation_controller.set_active_item(0)
+            self.update_curr_class()
 
     def custom_pcd(self, custom: int) -> None:
         self.save()
         self.pcd_manager.get_custom_pcd(custom)
         self.reset()
-        self.bbox_controller.set_bboxes(self.pcd_manager.get_labels_from_file())
+        self.unified_annotation_controller.set_items(self.pcd_manager.get_labels_from_file())
+        self.update_curr_class()
 
     # CONTROL METHODS
     def save(self) -> None:
@@ -130,7 +134,7 @@ class Controller:
         if self.unified_annotation_controller.has_active_item():
             self.unified_annotation_controller.set_active_item(index)
 
-            self.unified_annotation_controller.update_label_list()
+            self.update_all()
         
             self.view.status_manager.update_status(
                 f"Selected: {self.unified_annotation_controller.get_active_item().get_classname()}",
@@ -154,23 +158,25 @@ class Controller:
         if (
             (not self.side_mode)
             and self.curr_cursor_pos
-            and self.bbox_controller.has_active_bbox()
-            and (not self.scroll_mode)
+            and self.unified_annotation_controller.has_active_item()
+            and (not self.scroll_mode
+            )
+            and isinstance( self.unified_annotation_controller.get_active_item(), BBox)
         ):
             _, self.selected_side = oglhelper.get_intersected_sides(
                 self.curr_cursor_pos.x(),
                 self.curr_cursor_pos.y(),
-                self.bbox_controller.get_active_bbox(),  # type: ignore
+                self.unified_annotation_controller.get_active_item(),  # type: ignore
                 self.view.gl_widget.modelview,
                 self.view.gl_widget.projection,
             )
         if (
             self.selected_side
             and (not self.ctrl_pressed)
-            and self.bbox_controller.has_active_bbox()
+            and self.unified_annotation_controller.has_active_item()
         ):
             self.view.gl_widget.crosshair_col = Colors.RED.value
-            side_vertices = self.bbox_controller.get_active_bbox().get_vertices()  # type: ignore
+            side_vertices = self.unified_annotation_controller.get_active_item().get_vertices()  # type: ignore
             self.view.gl_widget.selected_side_vertices = side_vertices[
                 BBOX_SIDES[self.selected_side]
             ]

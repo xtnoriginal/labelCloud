@@ -102,7 +102,8 @@ class KittiFormat(BaseLabelFormat):
                         xyz1 = self.T_c2v @ xyz1
                         x, y, z = xyz1[:-1]
 
-                    point = Point(x, y, z, classname)
+                    point = Point((x, y, z))
+                    point.set_classname(classname)
                     labels.append(point)
 
                 else:

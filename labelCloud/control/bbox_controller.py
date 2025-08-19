@@ -32,7 +32,7 @@ def has_active_bbox_decorator(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if args[0].has_active_bbox():
+        if args[0].unified_annotation_controller.has_active_item():
             return func(*args, **kwargs)
         else:
             logging.warning("There is currently no active bounding box to manipulate.")
@@ -62,21 +62,8 @@ class BoundingBoxController(object):
     def __init__(self) -> None:
         self.view: GUI
         self.pcd_manager: PointCloudManger
-        self.bboxes: List[BBox] = []
-        self.active_bbox_id = -1  # -1 means zero bboxes
         self.unified_annotation_controller: UnifiedAnnotationController
 
-    # GETTERS
-    def has_active_bbox(self) -> bool:
-        return 0 <= self.active_bbox_id < len(self.bboxes)
-
-    def get_active_bbox(self) -> Optional[BBox]:
-        if self.has_active_bbox():
-            return self.bboxes[self.active_bbox_id]
-        else:
-            return None
-
-    @has_active_bbox_decorator
     def get_classname(self) -> str:
         return self.get_active_bbox().get_classname()  # type: ignore
 
@@ -153,33 +140,33 @@ class BoundingBoxController(object):
     @has_active_bbox_decorator
     def update_position(self, axis: str, value: float) -> None:
         if axis == "pos_x":
-            self.get_active_bbox().set_x_translation(value)  # type: ignore
+            self.unified_annotation_controller.get_active_item().set_x_translation(value)  # type: ignore
         elif axis == "pos_y":
-            self.get_active_bbox().set_y_translation(value)  # type: ignore
+            self.unified_annotation_controller.get_active_item().set_y_translation(value)  # type: ignore
         elif axis == "pos_z":
-            self.get_active_bbox().set_z_translation(value)  # type: ignore
+            self.unified_annotation_controller.set_z_translation(value)  # type: ignore
         else:
             raise Exception("Wrong axis describtion.")
 
     @has_active_bbox_decorator
     def update_dimension(self, dimension: str, value: float) -> None:
         if dimension == "length":
-            self.get_active_bbox().set_length(value)  # type: ignore
+            self.unified_annotation_controller.get_active_item().set_length(value)  # type: ignore
         elif dimension == "width":
-            self.get_active_bbox().set_width(value)  # type: ignore
+            self.unified_annotation_controller.get_active_item().set_width(value)  # type: ignore
         elif dimension == "height":
-            self.get_active_bbox().set_height(value)  # type: ignore
+            self.unified_annotation_controller.get_active_item().set_height(value)  # type: ignore
         else:
             raise Exception("Wrong dimension describtion.")
 
     @has_active_bbox_decorator
     def update_rotation(self, axis: str, value: float) -> None:
         if axis == "rot_x":
-            self.get_active_bbox().set_x_rotation(value)  # type: ignore
+            self.unified_annotation_controller.get_active_item().set_x_rotation(value)  # type: ignore
         elif axis == "rot_y":
-            self.get_active_bbox().set_y_rotation(value)  # type: ignore
+            self.unified_annotation_controller.get_active_item().set_y_rotation(value)  # type: ignore
         elif axis == "rot_z":
-            self.get_active_bbox().set_z_rotation(value)  # type: ignore
+            self.unified_annotation_controller.get_active_item().set_z_rotation(value)  # type: ignore
         else:
             raise Exception("Wrong axis describtion.")
 
@@ -218,12 +205,12 @@ class BoundingBoxController(object):
         if clockwise:
             dangle *= -1
         if absolute:
-            self.get_active_bbox().set_z_rotation(dangle)  # type: ignore
+            self.unified_annotation_controller.get_active_item().set_z_rotation(dangle)  # type: ignore
         else:
-            self.get_active_bbox().set_z_rotation(  # type: ignore
-                self.get_active_bbox().get_z_rotation() + dangle  # type: ignore
+            self.unified_annotation_controller.get_active_item().set_z_rotation(  # type: ignore
+                self.unified_annotation_controller.get_z_rotation() + dangle  # type: ignore
             )
-        self.update_all()
+        self.unified_annotation_controller.update_all()
 
     @has_active_bbox_decorator
     def rotate_with_mouse(
@@ -232,7 +219,7 @@ class BoundingBoxController(object):
         # Get bbox perspective
         assert self.pcd_manager.pointcloud is not None
         pcd_z_rotation = self.pcd_manager.pointcloud.rot_z
-        bbox_z_rotation = self.get_active_bbox().get_z_rotation()  # type: ignore
+        bbox_z_rotation = self.get_active_item().get_z_rotation()  # type: ignore
         total_z_rotation = pcd_z_rotation + bbox_z_rotation
 
         bbox_cosz = round(np.cos(np.deg2rad(total_z_rotation)), 0)
@@ -252,7 +239,7 @@ class BoundingBoxController(object):
 
         cosz, sinz, bu = self.pcd_manager.get_perspective()
 
-        active_bbox: Bbox = self.get_active_bbox()  # type: ignore
+        active_bbox: Bbox = self.unified_annotation_controller.get_active_item()  # type: ignore
         active_bbox.set_x_translation(active_bbox.center[0] + distance * cosz)
         active_bbox.set_y_translation(active_bbox.center[1] + distance * sinz)
 
@@ -266,7 +253,7 @@ class BoundingBoxController(object):
 
         cosz, sinz, bu = self.pcd_manager.get_perspective()
 
-        active_bbox: Bbox = self.get_active_bbox()  # type: ignore
+        active_bbox: Bbox = self.unified_annotation_controller.get_active_item()  # type: ignore
         active_bbox.set_x_translation(active_bbox.center[0] + distance * bu * -sinz)
         active_bbox.set_y_translation(active_bbox.center[1] + distance * bu * cosz)
 
@@ -278,7 +265,7 @@ class BoundingBoxController(object):
         if down:
             distance *= -1
 
-        active_bbox: Bbox = self.get_active_bbox()  # type: ignore
+        active_bbox: Bbox = self.unified_annotation_controller.get_active_item()  # type: ignore
         active_bbox.set_z_translation(active_bbox.center[2] + distance)
 
     @has_active_bbox_decorator
@@ -294,7 +281,7 @@ class BoundingBoxController(object):
         length_increase = length_increase or config.getfloat("LABEL", "std_scaling")
         if decrease:
             length_increase *= -1
-        length, width, height = self.get_active_bbox().get_dimensions()  # type: ignore
+        length, width, height = self.unified_annotation_controller.get_active_item().get_dimensions()  # type: ignore
         width_length_ratio = width / length
         height_length_ratio = height / length
 
@@ -302,7 +289,7 @@ class BoundingBoxController(object):
         new_width = new_length * width_length_ratio
         new_height = new_length * height_length_ratio
 
-        self.get_active_bbox().set_dimensions(new_length, new_width, new_height)  # type: ignore
+        self.unified_annotation_controller.get_active_bbox().set_dimensions(new_length, new_width, new_height)  # type: ignore
 
     @has_active_bbox_decorator
     def scale_along_length(
@@ -325,7 +312,7 @@ class BoundingBoxController(object):
         if decrease:
             step *= -1
 
-        active_bbox: Bbox = self.get_active_bbox()  # type: ignore
+        active_bbox: Bbox = self.unified_annotation_controller.get_active_item() # type: ignore
         length, width, height = active_bbox.get_dimensions()
         new_width = width + step
         active_bbox.set_dimensions(length, new_width, height)
@@ -338,7 +325,7 @@ class BoundingBoxController(object):
         if decrease:
             step *= -1
 
-        active_bbox: Bbox = self.get_active_bbox()  # type: ignore
+        active_bbox: Bbox = self.unified_annotation_controller.get_active_item()  # type: ignore
         length, width, height = active_bbox.get_dimensions()
         new_height = height + step
         active_bbox.set_dimensions(length, width, new_height)
@@ -361,18 +348,18 @@ class BoundingBoxController(object):
         self.update_z_dial()
         self.update_curr_class()
         self.update_label_list()
-        self.view.update_bbox_stats(self.get_active_bbox())
+        self.view.update_bbox_stats(self.unified_annotation_controller.get_active_item())
 
     @has_active_bbox_decorator
     def update_z_dial(self) -> None:
         self.view.dial_bbox_z_rotation.blockSignals(True)  # To brake signal loop
-        self.view.dial_bbox_z_rotation.setValue(int(self.get_active_bbox().get_z_rotation()))  # type: ignore
+        self.view.dial_bbox_z_rotation.setValue(int(self.unified_annotation_controller.get_active_item().get_z_rotation()))  # type: ignore
         self.view.dial_bbox_z_rotation.blockSignals(False)
 
     def update_curr_class(self) -> None:
         if self.has_active_bbox():
             self.view.current_class_dropdown.setCurrentText(
-                self.get_active_bbox().classname  # type: ignore
+                self.unified_annotation_controller.get_active_item().classname  # type: ignore
             )
         else:
             self.view.controller.pcd_manager.populate_class_dropdown()
