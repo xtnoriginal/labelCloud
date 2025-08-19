@@ -8,13 +8,13 @@ import logging
 import math
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import numpy.typing as npt
 
 from ...control.config_manager import config
-from ...model import BBox
+from ...model import BBox, Point
 from . import BaseLabelFormat, abs2rel_rotation, rel2abs_rotation
 
 
@@ -76,7 +76,7 @@ class KittiFormat(BaseLabelFormat):
         )  # id: meta
 
     def import_labels(self, pcd_path: Path) -> List[BBox]:
-        bboxes = []
+        labels = []
 
         label_path = self.label_folder.joinpath(pcd_path.stem + self.FILE_ENDING)
         if label_path.is_file():
@@ -85,108 +85,149 @@ class KittiFormat(BaseLabelFormat):
 
             for line in label_lines:
                 line_elements = line.split()
-                meta = {
-                    "type": line_elements[0],
-                    "truncated": line_elements[1],
-                    "occluded": line_elements[2],
-                    "alpha": line_elements[3],
-                    "bbox": " ".join(line_elements[4:8]),
-                    "dimensions": " ".join(line_elements[8:11]),
-                    "location": " ".join(line_elements[11:14]),
-                    "rotation_y": line_elements[14],
-                }
 
-                centroid = tuple([float(v) for v in meta["location"].split()])
 
-                height, width, length = tuple(
-                    [float(v) for v in meta["dimensions"].split()]
-                )
+                if line_elements[0] == "Point":  # custom point format
+                    classname = line_elements[1]
+                    x, y, z = map(float, line_elements[2:5])
+
+                    if self.transformed:
+                        try:
+                            self._get_transforms(pcd_path)
+                        except CalibrationFileNotFound:
+                            logging.exception("Calibration file not found")
+                            logging.warning("Skipping loading of labels for this point cloud")
+                            return []
+                        xyz1 = np.array([x, y, z, 1])
+                        xyz1 = self.T_c2v @ xyz1
+                        x, y, z = xyz1[:-1]
+
+                    point = Point(x, y, z, classname)
+                    labels.append(point)
+
+                else:
+                    meta = {
+                        "type": line_elements[0],
+                        "truncated": line_elements[1],
+                        "occluded": line_elements[2],
+                        "alpha": line_elements[3],
+                        "bbox": " ".join(line_elements[4:8]),
+                        "dimensions": " ".join(line_elements[8:11]),
+                        "location": " ".join(line_elements[11:14]),
+                        "rotation_y": line_elements[14],
+                    }
+
+                    centroid = tuple([float(v) for v in meta["location"].split()])
+
+                    height, width, length = tuple(
+                        [float(v) for v in meta["dimensions"].split()]
+                    )
+
+                    if self.transformed:
+                        try:
+                            self._get_transforms(pcd_path)
+                        except CalibrationFileNotFound as exc:
+                            logging.exception("Calibration file not found")
+                            logging.warning(
+                                "Skipping loading of labels for this point cloud"
+                            )
+                            return []
+
+                        xyz1 = np.insert(np.asarray(centroid), 3, values=[1])
+                        xyz1 = self.T_c2v @ xyz1
+                        centroid = tuple([float(n) for n in xyz1[:-1]])
+                        centroid = (
+                            centroid[0],
+                            centroid[1], 
+                            centroid[2] + height / 2,
+                        )  # centroid in KITTI located on bottom face of bbox
+
+                    bbox = BBox(*centroid, length, width, height)  # type: ignore
+                    self.bboxes_meta[id(bbox)] = meta
+
+                    rotation = (
+                        -float(meta["rotation_y"]) + math.pi / 2
+                        if self.transformed
+                        else float(meta["rotation_y"])
+                    )
+
+                    bbox.set_rotations(0, 0, rel2abs_rotation(rotation))
+                    bbox.set_classname(meta["type"])
+                    labels.append(bbox)
+
+            logging.info("Imported %s labels from %s." % (len(label_lines), label_path))
+        return labels
+
+    def export_labels(self, labels: List[Union[BBox,Point]], pcd_path: Path) -> None:
+        data = str()
+
+        # Labels
+        for obj in labels:
+            if isinstance(obj, BBox):
+                bbox: BBox = obj
+                obj_type = bbox.get_classname()
+                centroid = bbox.get_center()
+                length, width, height = bbox.get_dimensions()
+
+                # invert sequence to height, width, length
+                dimensions = height, width, length
 
                 if self.transformed:
                     try:
                         self._get_transforms(pcd_path)
-                    except CalibrationFileNotFound as exc:
+                    except CalibrationFileNotFound:
                         logging.exception("Calibration file not found")
-                        logging.warning(
-                            "Skipping loading of labels for this point cloud"
-                        )
-                        return []
+                        logging.warning("Skipping writing of labels for this point cloud")
+                        return
 
-                    xyz1 = np.insert(np.asarray(centroid), 3, values=[1])
-                    xyz1 = self.T_c2v @ xyz1
-                    centroid = tuple([float(n) for n in xyz1[:-1]])
                     centroid = (
                         centroid[0],
                         centroid[1],
-                        centroid[2] + height / 2,
+                        centroid[2] - height / 2,
                     )  # centroid in KITTI located on bottom face of bbox
+                    xyz1 = np.insert(np.asarray(centroid), 3, values=[1])
+                    xyz1 = self.T_v2c @ xyz1
+                    centroid = tuple([float(n) for n in xyz1[:-1]])  # type: ignore
 
-                bbox = BBox(*centroid, length, width, height)  # type: ignore
-                self.bboxes_meta[id(bbox)] = meta
+                rotation = bbox.get_z_rotation()
+                rotation = abs2rel_rotation(rotation)
+                rotation = -(rotation - math.pi / 2) if self.transformed else rotation
+                rotation = str(self.round_dec(rotation))  # type: ignore
 
-                rotation = (
-                    -float(meta["rotation_y"]) + math.pi / 2
-                    if self.transformed
-                    else float(meta["rotation_y"])
-                )
+                location_str = " ".join([str(self.round_dec(v)) for v in centroid])
+                dimensions_str = " ".join([str(self.round_dec(v)) for v in dimensions])
 
-                bbox.set_rotations(0, 0, rel2abs_rotation(rotation))
-                bbox.set_classname(meta["type"])
-                bboxes.append(bbox)
+                out_str = list(self.bboxes_meta[id(bbox)].values())
+                if obj_type != "DontCare":
+                    out_str[0] = obj_type
+                    out_str[5] = dimensions_str
+                    out_str[6] = location_str
+                    out_str[7] = rotation
 
-            logging.info("Imported %s labels from %s." % (len(label_lines), label_path))
-        return bboxes
+                data += " ".join(out_str) + "\n"
 
-    def export_labels(self, bboxes: List[BBox], pcd_path: Path) -> None:
-        data = str()
+            elif isinstance(obj, Point):  # custom point export
+                x, y, z = obj.get_coords()
 
-        # Labels
-        for bbox in bboxes:
-            obj_type = bbox.get_classname()
-            centroid = bbox.get_center()
-            length, width, height = bbox.get_dimensions()
+                if self.transformed:
+                    try:
+                        self._get_transforms(pcd_path)
+                    except CalibrationFileNotFound:
+                        logging.exception("Calibration file not found")
+                        logging.warning("Skipping writing of labels for this point cloud")
+                        return
+                    xyz1 = np.array([x, y, z, 1])
+                    xyz1 = self.T_v2c @ xyz1
+                    x, y, z = xyz1[:-1]
 
-            # invert sequence to height, width, length
-            dimensions = height, width, length
-
-            if self.transformed:
-                try:
-                    self._get_transforms(pcd_path)
-                except CalibrationFileNotFound:
-                    logging.exception("Calibration file not found")
-                    logging.warning("Skipping writing of labels for this point cloud")
-                    return
-
-                centroid = (
-                    centroid[0],
-                    centroid[1],
-                    centroid[2] - height / 2,
-                )  # centroid in KITTI located on bottom face of bbox
-                xyz1 = np.insert(np.asarray(centroid), 3, values=[1])
-                xyz1 = self.T_v2c @ xyz1
-                centroid = tuple([float(n) for n in xyz1[:-1]])  # type: ignore
-
-            rotation = bbox.get_z_rotation()
-            rotation = abs2rel_rotation(rotation)
-            rotation = -(rotation - math.pi / 2) if self.transformed else rotation
-            rotation = str(self.round_dec(rotation))  # type: ignore
-
-            location_str = " ".join([str(self.round_dec(v)) for v in centroid])
-            dimensions_str = " ".join([str(self.round_dec(v)) for v in dimensions])
-
-            out_str = list(self.bboxes_meta[id(bbox)].values())
-            if obj_type != "DontCare":
-                out_str[0] = obj_type
-                out_str[5] = dimensions_str
-                out_str[6] = location_str
-                out_str[7] = rotation
-
-            data += " ".join(out_str) + "\n"
-
+                classname = obj.get_classname()
+                line = f"Point {classname} {self.round_dec(x)} {self.round_dec(y)} {self.round_dec(z)}"
+                data += line + "\n"
+        
         # Save to TXT
         path_to_file = self.save_label_to_file(pcd_path, data)
         logging.info(
-            f"Exported {len(bboxes)} labels to {path_to_file} "
+            f"Exported {len(labels)} labels to {path_to_file} "
             f"in {self.__class__.__name__} formatting!"
         )
         self.T_v2c = None

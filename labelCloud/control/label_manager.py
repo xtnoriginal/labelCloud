@@ -1,10 +1,10 @@
 import logging
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from ..io.labels import BaseLabelFormat, CentroidFormat, KittiFormat, VerticesFormat
 from ..io.labels.config import LabelConfig
-from ..model import BBox
+from ..model import BBox, Point
 from .config_manager import config
 
 
@@ -52,7 +52,7 @@ class LabelManager(object):
 
         self.label_strategy = get_label_strategy(strategy, self.label_folder)
 
-    def import_labels(self, pcd_path: Path) -> List[BBox]:
+    def import_labels(self, pcd_path: Path) -> List[Union[BBox, Point]]:
         try:
             return self.label_strategy.import_labels(pcd_path)
         except KeyError as key_error:
@@ -70,5 +70,5 @@ class LabelManager(object):
             )
             return []
 
-    def export_labels(self, pcd_path: Path, bboxes: List[BBox]) -> None:
-        self.label_strategy.export_labels(bboxes, pcd_path)
+    def export_labels(self, pcd_path: Path, labels: List[Union[BBox,Point]]) -> None:
+        self.label_strategy.export_labels(labels, pcd_path)

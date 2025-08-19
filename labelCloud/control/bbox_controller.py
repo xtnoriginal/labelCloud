@@ -383,6 +383,7 @@ class BoundingBoxController(object):
         Should be always called if the bounding boxes changed.
         :return: None
         """
+        
         self.unified_annotation_controller.update_label_list()
 
     def assign_point_label_in_active_box(self) -> None:

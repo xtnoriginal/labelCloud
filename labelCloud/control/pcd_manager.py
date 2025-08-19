@@ -6,7 +6,7 @@ Sets the point cloud and original point cloud path. Initiate the writing to the 
 import logging
 from pathlib import Path
 from shutil import copyfile
-from typing import TYPE_CHECKING, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import open3d as o3d
@@ -15,7 +15,7 @@ import pkg_resources
 from ..definitions import LabelingMode, Point3D
 from ..io.labels.config import LabelConfig
 from ..io.pointclouds import BasePointCloudHandler, Open3DHandler
-from ..model import BBox, Perspective, PointCloud
+from ..model import BBox, Perspective, PointCloud, Point
 from ..utils.logger import blue, green, print_column
 from .config_manager import config
 from .label_manager import LabelManager
@@ -144,10 +144,10 @@ class PointCloudManger(object):
         for label_class in LabelConfig().classes:
             self.view.current_class_dropdown.addItem(label_class.name)
 
-    def get_labels_from_file(self) -> List[BBox]:
-        bboxes = self.label_manager.import_labels(self.pcd_path)
-        logging.info(green("Loaded %s bboxes!" % len(bboxes)))
-        return bboxes
+    def get_labels_from_file(self) -> List[Union[BBox,Point]]:
+        labels = self.label_manager.import_labels(self.pcd_path)
+        logging.info(green("Loaded %s labels!" % len(labels)))
+        return labels
 
     # SETTER
     def set_view(self, view: "GUI") -> None:
@@ -157,11 +157,11 @@ class PointCloudManger(object):
             set(LabelConfig().get_classes().keys())
         )  # TODO: Move to better location
 
-    def save_labels_into_file(self, bboxes: List[BBox]) -> None:
+    def save_labels_into_file(self, labels: List[Union[BBox,Point]]) -> None:
         if self.pcds:
-            self.label_manager.export_labels(self.pcd_path, bboxes)
+            self.label_manager.export_labels(self.pcd_path, labels)
             self.collected_object_classes.update(
-                {bbox.get_classname() for bbox in bboxes}
+                {label.get_classname() for label in labels}
             )
         else:
             logging.warning("No point clouds to save labels for!")

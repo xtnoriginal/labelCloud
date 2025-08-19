@@ -38,6 +38,9 @@ class Point(object):
     
     def get_classname(self) -> str:
         return self.classname
+    
+    def get_coords(self):
+        return (self.point[0], self.point[1], self.point[2])
 
    
     # SETTERS

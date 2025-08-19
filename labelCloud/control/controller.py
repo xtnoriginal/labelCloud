@@ -18,6 +18,7 @@ from .drawing_manager import DrawingManager
 from .pcd_manager import PointCloudManger
 from .unified_annotation_controller import UnifiedAnnotationController
 
+from ..definitions import Mode
 
 class Controller:
     MOVEMENT_THRESHOLD = 0.1
@@ -52,7 +53,7 @@ class Controller:
         self.pcd_manager.set_view(self.view)
         self.drawing_mode.set_view(self.view)
         self.align_mode.set_view(self.view)
-        self.view.gl_widget.set_bbox_controller(self.bbox_controller)
+        #self.view.gl_widget.set_bbox_controller(self.bbox_controller)
         self.view.gl_widget.set_unified_annotation_controller(self.unified_annotation_controller)
         self.bbox_controller.pcd_manager = self.pcd_manager
         self.bbox_controller.unified_annotation_controller = self.unified_annotation_controller
@@ -75,16 +76,19 @@ class Controller:
         if save:
             self.save()
         if self.pcd_manager.pcds_left():
-            previous_bboxes = self.bbox_controller.bboxes
+            previous_unified_bbox_point = self.unified_annotation_controller.items
             self.pcd_manager.get_next_pcd()
             self.reset()
-            self.bbox_controller.set_bboxes(self.pcd_manager.get_labels_from_file())
+            #self.bbox_controller.set_bboxes(self.pcd_manager.get_labels_from_file())
 
-            if not self.bbox_controller.bboxes and config.getboolean(
+            self.unified_annotation_controller.set_items(self.pcd_manager.get_labels_from_file())
+            
+
+            if not self.unified_annotation_controller.items and config.getboolean(
                 "LABEL", "propagate_labels"
             ):
-                self.bbox_controller.set_bboxes(previous_bboxes)
-            self.bbox_controller.set_active_bbox(0)
+                self.bbox_controller.set_bboxes(previous_unified_bbox_point)
+            self.unified_annotation_controller.set_active_item(0)
         else:
             self.view.update_progress(len(self.pcd_manager.pcds))
             self.view.button_next_pcd.setEnabled(False)
@@ -94,8 +98,10 @@ class Controller:
         if self.pcd_manager.current_id > 0:
             self.pcd_manager.get_prev_pcd()
             self.reset()
-            self.bbox_controller.set_bboxes(self.pcd_manager.get_labels_from_file())
-            self.bbox_controller.set_active_bbox(0)
+            # self.bbox_controller.set_bboxes(self.pcd_manager.get_labels_from_file())
+            # self.bbox_controller.set_active_bbox(0)
+            self.unified_annotation_controller.set_items(self.pcd_manager.get_labels_from_file())
+            self.unified_annotation_controller.set_active_item(0)
 
     def custom_pcd(self, custom: int) -> None:
         self.save()
@@ -106,7 +112,7 @@ class Controller:
     # CONTROL METHODS
     def save(self) -> None:
         """Saves all bounding boxes and optionally segmentation labels in the label file."""
-        self.pcd_manager.save_labels_into_file(self.bbox_controller.bboxes)
+        self.pcd_manager.save_labels_into_file(self.unified_annotation_controller.items)
 
         if LabelConfig().type == LabelingMode.SEMANTIC_SEGMENTATION:
             assert self.pcd_manager.pointcloud is not None
@@ -114,9 +120,24 @@ class Controller:
 
     def reset(self) -> None:
         """Resets the controllers and bounding boxes from the current screen."""
-        self.bbox_controller.reset()
+        self.unified_annotation_controller.reset()
         self.drawing_mode.reset()
         self.align_mode.reset()
+    
+
+    def set_active(self, index: int) -> None:
+        """Sets the active bounding box or point based on the index from the label list."""
+        if self.unified_annotation_controller.has_active_item():
+            self.unified_annotation_controller.set_active_item(index)
+
+            self.unified_annotation_controller.update_label_list()
+        
+            self.view.status_manager.update_status(
+                f"Selected: {self.unified_annotation_controller.get_active_item().get_classname()}",
+                mode=Mode.CORRECTION
+            )
+        else:
+            logging.warning("No active item to set.")
 
     # CORRECTION METHODS
     def set_crosshair(self) -> None:
@@ -398,3 +419,46 @@ class Controller:
             logging.warning("No points found inside the box. Ignored.")
             return
         self.view.save_point_cloud_as(pointcloud)
+
+
+    def set_classname(self, classname: str) -> None:
+        """Sets the classname of the active bounding box."""
+        if self.unified_annotation_controller.has_active_item():
+            self.unified_annotation_controller.get_active_item().set_classname(classname)
+        
+        self.update_label_list()
+
+    def update_label_list(self) -> None:
+        """Updates the list of drawn labels and highlights the active label.
+
+        Should be always called if the bounding boxes changed.
+        :return: None
+        """
+        self.unified_annotation_controller.update_label_list()
+    
+    def delete_current(self) -> None:
+        """Deletes the currently selected bounding box or point."""
+        self.unified_annotation_controller.delete_bbox()
+        self.update_all() 
+
+    def deselect_label(self) -> None:
+        """Deselects the currently selected bounding box or point."""
+        self.unified_annotation_controller.deselect_label()
+        self.update_all()
+        self.view.status_manager.set_mode(Mode.NAVIGATION)
+
+    
+    def update_all(self) -> None:
+        #self.update_z_dial()
+        self.update_curr_class()
+        self.update_label_list()
+        self.view.update_bbox_stats(self.unified_annotation_controller.get_active_item())
+
+
+    def update_curr_class(self) -> None:
+        if self.unified_annotation_controller.has_active_item():
+            self.view.current_class_dropdown.setCurrentText(
+                self.unified_annotation_controller.get_active_item().classname  # type: ignore
+            )
+        else:
+            self.view.controller.pcd_manager.populate_class_dropdown()

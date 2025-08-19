@@ -31,6 +31,8 @@ from .startup.dialog import StartupDialog
 from .status_manager import StatusManager
 from .viewer import GLWidget
 
+from ..model.bbox import BBox
+
 if TYPE_CHECKING:
     from ..control.controller import Controller
 
@@ -310,16 +312,16 @@ class GUI(QtWidgets.QMainWindow):
 
         # LABELING CONTROL
         self.current_class_dropdown.currentTextChanged.connect(
-            self.controller.bbox_controller.set_classname
+            self.controller.set_classname
         )
         self.button_deselect_label.clicked.connect(
-            self.controller.bbox_controller.deselect_bbox
+            self.controller.deselect_label
         )
         self.button_delete_label.clicked.connect(
-            self.controller.bbox_controller.delete_current_bbox
+            self.controller.delete_current
         )
         self.label_list.currentRowChanged.connect(
-            self.controller.bbox_controller.set_active_bbox
+            self.controller.set_active
         )
         self.button_assign_label.clicked.connect(
             self.controller.bbox_controller.assign_point_label_in_active_box
@@ -405,6 +407,7 @@ class GUI(QtWidgets.QMainWindow):
         self.act_save_perspective.toggled.connect(set_keep_perspective)
         self.act_align_pcd.toggled.connect(self.controller.align_mode.change_activation)
         self.act_change_settings.triggered.connect(self.show_settings_dialog)
+
 
     def set_checkbox_states(self) -> None:
         self.act_propagate_labels.setChecked(
@@ -536,7 +539,7 @@ class GUI(QtWidgets.QMainWindow):
 
     def update_bbox_stats(self, bbox) -> None:
         viewing_precision = config.getint("USER_INTERFACE", "viewing_precision")
-        if bbox and not self.line_edited_activated():
+        if bbox and not self.line_edited_activated() and  isinstance(bbox, BBox):
             self.edit_pos_x.setText(str(round(bbox.get_center()[0], viewing_precision)))
             self.edit_pos_y.setText(str(round(bbox.get_center()[1], viewing_precision)))
             self.edit_pos_z.setText(str(round(bbox.get_center()[2], viewing_precision)))

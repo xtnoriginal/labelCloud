@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 
 import numpy as np
 
-from ...model import BBox
+from ...model import BBox,Point
 from .config import LabelConfig
 
 
@@ -59,11 +59,11 @@ class BaseLabelFormat(ABC):
         return label_path
 
     @abstractmethod
-    def import_labels(self, pcd_path: Path) -> List[BBox]:
+    def import_labels(self, pcd_path: Path) -> List[Union[BBox, Point]]:
         raise NotImplementedError
 
     @abstractmethod
-    def export_labels(self, bboxes: List[BBox], pcd_path: Path) -> None:
+    def export_labels(self, labels: List[Union[BBox, Point]], pcd_path: Path) -> None:
         raise NotImplementedError
 
 

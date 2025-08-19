@@ -1,20 +1,22 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union 
 
 import numpy as np
 
 from . import BaseLabelFormat
 from ...definitions import Point3D
-from ...model import BBox
+from ...model import BBox, Point
 from ...utils import math3d
 
 
 class VerticesFormat(BaseLabelFormat):
     FILE_ENDING = ".json"
+    
+    from ...model.point import Point
 
-    def import_labels(self, pcd_path: Path) -> List[BBox]:
+    def import_labels(self, pcd_path: Path) -> List[Union[BBox, Point]]:
         labels = []
 
         label_path = self.label_folder.joinpath(pcd_path.stem + self.FILE_ENDING)
@@ -23,50 +25,55 @@ class VerticesFormat(BaseLabelFormat):
                 data = json.load(read_file)
 
             for label in data["objects"]:
-                vertices = label["vertices"]
+                if "vertices" in label:  # BBox
+                    vertices = label["vertices"]
 
-                # Calculate centroid
-                centroid: Point3D = tuple(  # type: ignore
-                    np.add(np.subtract(vertices[4], vertices[2]) / 2, vertices[2])
-                )
+                    centroid: Point3D = tuple(
+                        np.add(np.subtract(vertices[4], vertices[2]) / 2, vertices[2])
+                    )
 
-                # Calculate dimensions
-                length = math3d.vector_length(np.subtract(vertices[0], vertices[3]))
-                width = math3d.vector_length(np.subtract(vertices[0], vertices[1]))
-                height = math3d.vector_length(np.subtract(vertices[0], vertices[4]))
+                    length = math3d.vector_length(np.subtract(vertices[0], vertices[3]))
+                    width  = math3d.vector_length(np.subtract(vertices[0], vertices[1]))
+                    height = math3d.vector_length(np.subtract(vertices[0], vertices[4]))
 
-                # Calculate rotations
-                rotations = math3d.vertices2rotations(vertices, centroid)
+                    rotations = math3d.vertices2rotations(vertices, centroid)
 
-                bbox = BBox(*centroid, length, width, height)
-                bbox.set_rotations(*rotations)
-                bbox.set_classname(label["name"])
-                labels.append(bbox)
+                    bbox = BBox(*centroid, length, width, height)
+                    bbox.set_rotations(*rotations)
+                    bbox.set_classname(label["name"])
+                    labels.append(bbox)
+
+                elif "point" in label:  # Point
+                    x, y, z = label["point"]
+                    point = Point(x, y, z, classname=label["name"])
+                    labels.append(point)
+
             logging.info(
                 "Imported %s labels from %s." % (len(data["objects"]), label_path)
             )
         return labels
 
-    def export_labels(self, bboxes: List[BBox], pcd_path: Path) -> None:
+    def export_labels(self, labels: List[Union[BBox, Point]], pcd_path: Path) -> None:
         data: Dict[str, Any] = dict()
-        # Header
         data["folder"] = pcd_path.parent.name
         data["filename"] = pcd_path.name
         data["path"] = str(pcd_path)
 
-        # Labels
         data["objects"] = []
-        for bbox in bboxes:
-            label: Dict[str, Any] = dict()
-            label["name"] = bbox.get_classname()
-            label["vertices"] = self.round_dec(
-                bbox.get_vertices().tolist()
-            )  # TODO: Add option for axis-aligned vertices
-            data["objects"].append(label)
+        for label in labels:
+            obj: Dict[str, Any] = dict()
+            obj["name"] = label.get_classname()
 
-        # Save to JSON
+            if isinstance(label, BBox):
+                obj["vertices"] = self.round_dec(label.get_vertices().tolist())
+            elif isinstance(label, Point):
+                obj["point"] = self.round_dec(label.get_coords())
+
+            data["objects"].append(obj)
+
         label_path = self.save_label_to_file(pcd_path, data)
         logging.info(
-            f"Exported {len(bboxes)} labels to {label_path} "
+            f"Exported {len(labels)} labels to {label_path} "
             f"in {self.__class__.__name__} formatting!"
         )
+
