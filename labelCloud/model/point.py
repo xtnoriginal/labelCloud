@@ -44,11 +44,19 @@ class Point(object):
 
    
     # SETTERS
-
     def set_classname(self, classname: str) -> None:
         if classname:
             self.classname = classname
+ 
+    
+    def set_x_translation(self, x_translation: float) -> None:
+        self.point = (x_translation, *self.point[1:])
 
+    def set_y_translation(self, y_translation: float) -> None:
+        self.point = (self.point[0], y_translation, self.point[2])
+
+    def set_z_translation(self, z_translation: float) -> None:
+        self.point = (*self.point[:2], z_translation)
 
     # Draw the BBox using verticies
     def draw(self, highlighted: bool = False) -> None:

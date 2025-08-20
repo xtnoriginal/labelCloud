@@ -59,6 +59,7 @@ class Controller:
         self.bbox_controller.pcd_manager = self.pcd_manager
         self.bbox_controller.unified_annotation_controller = self.unified_annotation_controller
         self.pick_point_controller.unified_annotation_controller = self.unified_annotation_controller
+        self.pick_point_controller.pcd_manager = self.pcd_manager
         self.unified_annotation_controller.set_view(self.view)
 
 
@@ -282,7 +283,7 @@ class Controller:
 
     def key_press_event(self, a0: QtGui.QKeyEvent) -> None:
         """Triggers actions when the user presses a key."""
-
+        controller = self.active_controller()
         # Reset position to intial value
         if a0.key() == Keys.Key_Control:
             self.ctrl_pressed = True
@@ -297,7 +298,7 @@ class Controller:
             logging.info("Reseted position to default.")
 
         elif a0.key() == Keys.Key_Delete:  # Delete active bbox
-            self.bbox_controller.delete_current_bbox()
+            self.unified_annotation_controller.delete_bbox()
 
         # Save labels to file
         elif a0.key() == Keys.Key_S and self.ctrl_pressed:
@@ -323,51 +324,58 @@ class Controller:
             self.bbox_controller.rotate_around_y()
         elif a0.key() == Keys.Key_V:
             # y rotate clockwise
-            self.bbox_controller.rotate_around_y(clockwise=True)
+            controller.rotate_around_y(clockwise=True)
         elif a0.key() == Keys.Key_B:
             # x rotate counterclockwise
             self.bbox_controller.rotate_around_x()
         elif a0.key() == Keys.Key_N:
             # x rotate clockwise
-            self.bbox_controller.rotate_around_x(clockwise=True)
+            controller.rotate_around_x(clockwise=True)
         elif a0.key() == Keys.Key_W:
             # move backward
-            self.bbox_controller.translate_along_y()
+            controller.translate_along_y()
         elif a0.key() == Keys.Key_S:
             # move forward
-            self.bbox_controller.translate_along_y(forward=True)
+            controller.translate_along_y(forward=True)
         elif a0.key() == Keys.Key_A:
             # move left
-            self.bbox_controller.translate_along_x(left=True)
+            controller.translate_along_x(left=True)
         elif a0.key() == Keys.Key_D:
             # move right
-            self.bbox_controller.translate_along_x()
+            controller.translate_along_x()
         elif a0.key() == Keys.Key_Q:
             # move up
-            self.bbox_controller.translate_along_z()
+
+            controller.translate_along_z()
         elif a0.key() == Keys.Key_E:
             # move down
-            self.bbox_controller.translate_along_z(down=True)
+            controller.translate_along_z(down=True)
 
         # BBOX Scaling
         elif a0.key() == Keys.Key_I:
-            # increase length
-            self.bbox_controller.scale_along_length()
+            if isinstance(controller, BoundingBoxController):
+                # increase length
+                self.bbox_controller.scale_along_length()
         elif a0.key() == Keys.Key_O:
-            # decrease length
-            self.bbox_controller.scale_along_length(decrease=True)
+            if isinstance(controller, BoundingBoxController):
+                self.bbox_controller.scale_along_length(decrease=True)
         elif a0.key() == Keys.Key_K:
-            # increase width
-            self.bbox_controller.scale_along_width()
+            if isinstance(controller, BoundingBoxController):
+                # increase width
+                self.bbox_controller.scale_along_width()
         elif a0.key() == Keys.Key_L:
-            # decrease width
-            self.bbox_controller.scale_along_width(decrease=True)
+            if isinstance(controller, BoundingBoxController):
+                # decrease width
+                self.bbox_controller.scale_along_width(decrease=True)
         elif a0.key() == Keys.Key_Comma:
-            # increase height
-            self.bbox_controller.scale_along_height()
+            if isinstance(controller,BoundingBoxController):
+                # increase height
+                self.bbox_controller.scale_along_height()
         elif a0.key() == Keys.Key_Period:
-            # decrease height
-            self.bbox_controller.scale_along_height(decrease=True)
+
+            if isinstance(controller,BoundingBoxController):
+                # decrease height
+                self.bbox_controller.scale_along_height(decrease=True)
 
         elif a0.key() in [Keys.Key_R, Keys.Key_Left]:
             # load previous sample
@@ -389,7 +397,8 @@ class Controller:
             self.select_relative_class(1)
         elif a0.key() in list(range(49, 58)):
             # select bboxes with 1-9 digit keys
-            self.bbox_controller.set_active_bbox(int(a0.key()) - 49)
+            self.unified_annotation_controller.set_active_item(int(a0.key()) - 49)
+            self.update_all()
 
     def select_relative_class(self, step: int):
         if step == 0:
@@ -468,3 +477,30 @@ class Controller:
             )
         else:
             self.view.controller.pcd_manager.populate_class_dropdown()
+
+
+
+    def active_controller(self):
+
+        if self.unified_annotation_controller.has_active_item():
+            if isinstance(self.unified_annotation_controller.get_active_item(), BBox):
+                return self.bbox_controller
+            return self.pick_point_controller
+        else:
+            print("No controller")
+            return None
+
+    def translate_along_x(self, left=False):
+        controller = self.active_controller() 
+        if controller:
+            controller.translate_along_x(left=left)
+
+    def translate_along_y(self, forward=False):
+        controller = self.active_controller() 
+        if controller:
+            controller.translate_along_y(forward=forward)
+
+    def translate_along_z(self, down=False):
+        controller = self.active_controller() 
+        if controller:
+            controller.translate_along_z(down=down)

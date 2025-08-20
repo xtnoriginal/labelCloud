@@ -295,23 +295,23 @@ class GUI(QtWidgets.QMainWindow):
 
         # BBOX CONTROL
         self.button_bbox_up.pressed.connect(
-            lambda: self.controller.bbox_controller.translate_along_z()
+            lambda: self.controller.translate_along_z()
         )
         self.button_bbox_down.pressed.connect(
-            lambda: self.controller.bbox_controller.translate_along_z(down=True)
+            lambda: self.controller.translate_along_z(down=True)
         )
         self.button_bbox_left.pressed.connect(
-            lambda: self.controller.bbox_controller.translate_along_x(left=True)
+            lambda: self.controller.translate_along_x(left=True)
         )
         self.button_bbox_right.pressed.connect(
-            self.controller.bbox_controller.translate_along_x
+            self.controller.translate_along_x
         )
         self.button_bbox_forward.pressed.connect(
-            lambda: self.controller.bbox_controller.translate_along_y(forward=True)
+            lambda: self.controller.translate_along_y(forward=True)
         )
         self.button_set_pcd.pressed.connect(lambda: self.ask_custom_index())
         self.button_bbox_backward.pressed.connect(
-            lambda: self.controller.bbox_controller.translate_along_y()
+            lambda: self.controller.translate_along_y()
         )
 
         self.dial_bbox_z_rotation.valueChanged.connect(

@@ -32,7 +32,7 @@ def has_active_point_decorator(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if args[0].has_active_point():
+        if args[0].unified_annotation_controller.has_active_item():
             return func(*args, **kwargs)
         else:
             logging.warning("There is currently no active point to manipulate.")
@@ -145,6 +145,49 @@ class PickPointController(object):
         self.view.dial_bbox_z_rotation.blockSignals(True)  # To brake signal loop
         self.view.dial_bbox_z_rotation.setValue(int(self.get_active_point().get_z_rotation()))  # type: ignore
         self.view.dial_bbox_z_rotation.blockSignals(False)
+    
+
+    @has_active_point_decorator
+    def translate_along_x(
+        self, distance: Optional[float] = None, left: bool = False
+    ) -> None:
+        distance = distance or config.getfloat("LABEL", "std_translation")
+        if left:
+            distance *= -1
+
+        cosz, sinz, bu = self.pcd_manager.get_perspective()
+
+        active_point: Point = self.unified_annotation_controller.get_active_item()  # type: ignore
+        active_point.set_x_translation(active_point.point[0] + distance * cosz)
+        active_point.set_y_translation(active_point.point[1] + distance * sinz)
+
+    @has_active_point_decorator
+    def translate_along_y(
+        self, distance: Optional[float] = None, forward: bool = False
+    ) -> None:
+        distance = distance or config.getfloat("LABEL", "std_translation")
+        if forward:
+            distance *= -1
+
+        print("Hellow")
+        cosz, sinz, bu = self.pcd_manager.get_perspective()
+
+        active_point: Point = self.unified_annotation_controller.get_active_item()  # type: ignore
+        active_point.set_x_translation(active_point.point[0] + distance * bu * -sinz)
+        active_point.set_y_translation(active_point.point[1] + distance * bu * cosz)
+
+    @has_active_point_decorator
+    def translate_along_z(
+        self, distance: Optional[float] = None, down: bool = False
+    ) -> None:
+        
+        print("Hello world")
+        distance = distance or config.getfloat("LABEL", "std_translation")
+        if down:
+            distance *= -1
+
+        active_point: Point = self.unified_annotation_controller.get_active_item()  # type: ignore
+        active_point.set_z_translation(active_point.point[2] + distance)
 
 
 
