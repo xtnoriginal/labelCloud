@@ -9,8 +9,9 @@ from OpenGL import GLU
 from . import math3d
 from ..definitions import BBOX_SIDES, Color4f, Point3D
 
+
 if TYPE_CHECKING:
-    from ..model import BBox, PointCloud
+    from ..model import BBox, PointCloud, Point
 
 
 DEVICE_PIXEL_RATIO: Optional[float] = (
@@ -135,7 +136,7 @@ def get_pick_ray(x: float, y: float, modelview, projection) -> Tuple[Point3D, Po
 
 
 def get_intersected_bboxes(
-    x: float, y: float, bboxes: List["BBox"], modelview, projection
+    x: float, y: float, items: List[Union["BBox", "Point"]], modelview, projection
 ) -> Union[int, None]:
     """Checks if the picking ray intersects any bounding box from bboxes.
 
@@ -146,9 +147,14 @@ def get_intersected_bboxes(
     :param projection: projection matrix
     :return: Id of the intersected bounding box or None if no bounding box is intersected
     """
+    from ..model import BBox
     intersected_bboxes = {}  # bbox_index: bbox
-    for index, bbox in enumerate(bboxes):
-        intersection_point, _ = get_intersected_sides(x, y, bbox, modelview, projection)
+    for index, item in enumerate(items):
+
+        if isinstance(item, BBox):
+            intersection_point, _ = get_intersected_sides(x, y, item, modelview, projection)
+        else:
+            intersection_point = get_point_intersection(x, y, item.point, modelview, projection)
         if intersection_point is not None:
             intersected_bboxes[index] = intersection_point[2]
 
@@ -211,3 +217,33 @@ def get_intersected_sides(
         return intersections[0]
     else:
         return None, None
+
+
+def get_point_intersection(
+    x: float,
+    y: float,
+    point: Union[np.ndarray, tuple, list],
+    modelview,
+    projection,
+    threshold: float = 0.05
+) -> Optional[np.ndarray]:
+    """
+    Checks if the picking ray intersects (is close to) a single point.
+
+    :param x: x screen coordinate
+    :param y: y screen coordinate
+    :param point: (3,) array-like point coordinates
+    :param modelview: modelview matrix
+    :param projection: projection matrix
+    :param threshold: distance threshold for "hitting" the point
+    :return: intersection point (np.ndarray) or None
+    """
+    p0, p1 = get_pick_ray(x, y, modelview, projection)
+    p0, p1 = np.array(p0, dtype=float), np.array(p1, dtype=float)
+    point = np.array(point, dtype=float)
+
+    ray_dir = p1 - p0
+    ray_dir /= np.linalg.norm(ray_dir)
+
+    # vector from ray start to point
+    v = point - p0

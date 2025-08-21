@@ -13,10 +13,10 @@
         {
             "name": "box",
             "id": 2,
-            "color": "#f57900"
+            "color": "#000000"
         }
     ],
-    "default": 0,
+    "default": 2,
     "type": "object_detection",
     "format": "vertices",
     "created_with": {

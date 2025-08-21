@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Optional, Set
 import pkg_resources
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import QEvent
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap,QIcon
 from PyQt5.QtWidgets import (
     QAction,
     QActionGroup,
@@ -88,33 +88,6 @@ STYLESHEET = """
         background-color: #0000DD;
     }}
 
-    QListWidget#label_list::item {{
-        padding-left: 22px;
-        padding-top: 7px;
-        padding-bottom: 7px;
-        background: url("{icons_dir}/cube-outline.svg") center left no-repeat;
-    }}
-
-    QListWidget#label_list::item:selected {{
-        color: #FFF;
-        border: none;
-        background: rgb(0, 0, 255);
-        background: url("{icons_dir}/cube-outline_white.svg") center left no-repeat, #0000ff;
-    }}
-
-     QListWidget#label_list_point::item {{
-        padding-left: 22px;
-        padding-top: 7px;
-        padding-bottom: 7px;
-        background: url("{icons_dir}/circle-medium.svg") center left no-repeat;
-    }}
-
-    QListWidget#label_list_point::item:selected {{
-        color: #FFF;
-        border: none;
-        background: rgb(0, 0, 255);
-        background: url("{icons_dir}/circle-medium.svg") center left no-repeat, #0000ff;
-    }}
 
     QComboBox#current_class_dropdown::item:checked{{
         color: gray;
@@ -187,6 +160,11 @@ class GUI(QtWidgets.QMainWindow):
         self.button_next_pcd: QtWidgets.QPushButton
         self.button_set_pcd: QtWidgets.QPushButton
         self.progressbar_pcds: QtWidgets.QProgressBar
+
+        self.icon_bbox = QIcon(str(Path(__file__).parent.parent / "resources/icons/cube-outline.svg"))
+        self.icon_point = QIcon(str(Path(__file__).parent.parent / "resources/icons/circle-medium.svg"))
+
+
 
         # bbox control section
         self.button_bbox_up: QtWidgets.QPushButton
@@ -342,7 +320,7 @@ class GUI(QtWidgets.QMainWindow):
         )
         # context menu
         self.act_delete_class.triggered.connect(
-            self.controller.bbox_controller.delete_current_bbox
+            self.controller.delete_current
         )
         self.act_crop_pointcloud_inside.triggered.connect(
             self.controller.crop_pointcloud_inside_active_bbox
@@ -411,7 +389,7 @@ class GUI(QtWidgets.QMainWindow):
             self.change_default_object_class
         )
         self.act_delete_all_labels.triggered.connect(
-            self.controller.bbox_controller.reset
+            self.controller.unified_annotation_controller.reset
         )
         self.act_propagate_labels.toggled.connect(set_propagate_labels)
         self.act_z_rotation_only.toggled.connect(set_zrotation_only)
@@ -713,9 +691,9 @@ class GUI(QtWidgets.QMainWindow):
         self.input_pcd.setLabelText(f"Insert Point Cloud number: {pcd_path.name}")
 
     def change_label_color(self):
-        bbox = self.controller.bbox_controller.get_active_bbox()
+        item = self.controller.unified_annotation_controller.get_active_item()
         LabelConfig().set_class_color(
-            bbox.classname, Color3f.from_qcolor(QColorDialog.getColor())
+            item.classname, Color3f.from_qcolor(QColorDialog.getColor())
         )
 
     @staticmethod

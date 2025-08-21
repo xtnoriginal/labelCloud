@@ -65,6 +65,7 @@ class PickPointController(object):
         if isinstance(point, Point):
             self.points.append(point) #TODO  : Remove this line if not needed
             self.unified_annotation_controller.add_item(point)
+            self.unified_annotation_controller.update_label_list()
             self.set_active_point(self.points.index(point))
             self.view.current_class_dropdown.setCurrentText(
                 self.get_active_point().classname  # type: ignore
@@ -169,7 +170,7 @@ class PickPointController(object):
         if forward:
             distance *= -1
 
-        print("Hellow")
+       
         cosz, sinz, bu = self.pcd_manager.get_perspective()
 
         active_point: Point = self.unified_annotation_controller.get_active_item()  # type: ignore
@@ -181,7 +182,7 @@ class PickPointController(object):
         self, distance: Optional[float] = None, down: bool = False
     ) -> None:
         
-        print("Hello world")
+        
         distance = distance or config.getfloat("LABEL", "std_translation")
         if down:
             distance *= -1

@@ -74,14 +74,10 @@ class BoundingBoxController(object):
 
     def add_bbox(self, bbox: BBox) -> None:
         if isinstance(bbox, BBox):
-            self.bboxes.append(bbox) #TODO REMOVE THIS
             
             self.unified_annotation_controller.add_item(bbox)
-
-            self.set_active_bbox(self.bboxes.index(bbox))
-            self.view.current_class_dropdown.setCurrentText(
-                self.get_active_bbox().classname  # type: ignore
-            )
+            self.unified_annotation_controller.update_label_list()
+            
             self.view.status_manager.update_status(
                 "Bounding Box added, it can now be corrected.", Mode.CORRECTION
             )
@@ -276,8 +272,11 @@ class BoundingBoxController(object):
 
         :param length_increase: factor by which the length should be increased
         :param decrease: if True, reverses the length_increasee (* -1)
-        :return: None
+        :return: None        
         """
+        if not isinstance(self.unified_annotation_controller.get_active_item(),BBox):
+            return
+
         length_increase = length_increase or config.getfloat("LABEL", "std_scaling")
         if decrease:
             length_increase *= -1
@@ -295,6 +294,10 @@ class BoundingBoxController(object):
     def scale_along_length(
         self, step: Optional[float] = None, decrease: bool = False
     ) -> None:
+        
+        if not isinstance(self.unified_annotation_controller.get_active_item(),BBox):
+            return
+
         step = step or config.getfloat("LABEL", "std_scaling")
         if decrease:
             step *= -1
@@ -308,6 +311,10 @@ class BoundingBoxController(object):
     def scale_along_width(
         self, step: Optional[float] = None, decrease: bool = False
     ) -> None:
+        
+        if not isinstance(self.unified_annotation_controller.get_active_item(),BBox):
+            return
+
         step = step or config.getfloat("LABEL", "std_scaling")
         if decrease:
             step *= -1
@@ -321,10 +328,15 @@ class BoundingBoxController(object):
     def scale_along_height(
         self, step: Optional[float] = None, decrease: bool = False
     ) -> None:
+        
+        if not isinstance(self.unified_annotation_controller.get_active_item(),BBox):
+            return
+
         step = step or config.getfloat("LABEL", "std_scaling")
         if decrease:
             step *= -1
 
+    
         active_bbox: Bbox = self.unified_annotation_controller.get_active_item()  # type: ignore
         length, width, height = active_bbox.get_dimensions()
         new_height = height + step

@@ -208,10 +208,22 @@ class Controller:
 
         elif self.selected_side:
             self.side_mode = True
+    
+    def select_item_by_ray(self, x: int, y: int) -> None:
+        intersected_bbox_id = oglhelper.get_intersected_bboxes(
+            x,
+            y,
+            self.unified_annotation_controller.items,
+            self.view.gl_widget.modelview,
+            self.view.gl_widget.projection,
+        )
+        if intersected_bbox_id is not None:
+            self.unified_annotation_controller.set_active_item(intersected_bbox_id)
+            logging.info("Selected bounding box or point %s." % intersected_bbox_id)
 
     def mouse_double_clicked(self, a0: QtGui.QMouseEvent) -> None:
         """Triggers actions when the user double clicks the mouse."""
-        self.bbox_controller.select_bbox_by_ray(a0.x(), a0.y())
+        self.select_item_by_ray(a0.x(), a0.y())
 
     def mouse_move_event(self, a0: QtGui.QMouseEvent) -> None:
         """Triggers actions when the user moves the mouse."""
@@ -273,10 +285,14 @@ class Controller:
             and self.drawing_mode.drawing_strategy is not None
         ):
             self.drawing_mode.drawing_strategy.register_scrolling(a0.angleDelta().y())
-        elif self.side_mode and self.bbox_controller.has_active_bbox():
-            self.bbox_controller.get_active_bbox().change_side(  # type: ignore
-                self.selected_side, -a0.angleDelta().y() / 4000  # type: ignore
-            )  # ToDo implement method
+        elif self.side_mode and self.unified_annotation_controller.has_active_item():
+            item = self.unified_annotation_controller.get_active_item()
+            if isinstance(item, BBox):
+                self.unified_annotation_controller.get_active_item().change_side(  # type: ignore
+                    self.selected_side, -a0.angleDelta().y() / 4000  # type: ignore
+                )  # ToDo implement method
+            else:
+                pass
         else:
             self.pcd_manager.zoom_into(a0.angleDelta().y())
             self.scroll_mode = True
@@ -425,7 +441,14 @@ class Controller:
             self.view.status_manager.clear_message(Context.CONTROL_PRESSED)
 
     def crop_pointcloud_inside_active_bbox(self) -> None:
-        bbox = self.bbox_controller.get_active_bbox()
+        item = self.unified_annotation_controller.get_active_item()
+
+        if not isinstance(item, BBox):
+            return 
+        
+        bbox = item
+
+
         assert bbox is not None
         assert self.pcd_manager.pointcloud is not None
         points_inside = bbox.is_inside(self.pcd_manager.pointcloud.points)

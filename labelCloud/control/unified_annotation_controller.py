@@ -1,5 +1,6 @@
 from ..model import Point, BBox
 from typing import List, Union
+from PyQt5 import QtWidgets
 
 class UnifiedAnnotationController:
     def __init__(self):
@@ -58,8 +59,18 @@ class UnifiedAnnotationController:
         """
         self.view.label_list.blockSignals(True)  # To brake signal loop
         self.view.label_list.clear()
+        
         for item in self.items:
-            self.view.label_list.addItem(item.get_classname())
+            list_item = QtWidgets.QListWidgetItem(item.get_classname())
+    
+            # Set icon based on type
+            if isinstance(item, BBox):
+                list_item.setIcon(self.view.icon_bbox)  # cube icon
+            elif isinstance(item, Point):
+                list_item.setIcon(self.view.icon_point)  # point/circle icon
+    
+            self.view.label_list.addItem(list_item)
+
         if self.has_active_item():
             self.view.label_list.setCurrentRow(self.active_index)
             current_item = self.view.label_list.currentItem()
