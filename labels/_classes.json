@@ -6,17 +6,232 @@
             "color": "#9da2ab"
         },
         {
-            "name": "cart",
+            "name": "background",
             "id": 1,
-            "color": "#f156ff"
+            "color": "#000000"
         },
         {
-            "name": "box",
+            "name": "lfront_foot_back",
             "id": 2,
-            "color": "#000000"
+            "color": "#f0b8b8"
+        },
+        {
+            "name": "lfront_foot_tip",
+            "id": 3,
+            "color": "#a9344c"
+        },
+        {
+            "name": "rfront_foot_tip",
+            "id": 4,
+            "color": "#c72b16"
+        },
+        {
+            "name": "lfront_sesamoid",
+            "id": 5,
+            "color": "#0629f3"
+        },
+        {
+            "name": "rfront_sesamoid",
+            "id": 6,
+            "color": "#592698"
+        },
+        {
+            "name": "lback_foot_tip",
+            "id": 7,
+            "color": "#74ac62"
+        },
+        {
+            "name": "rback_foot_tip",
+            "id": 8,
+            "color": "#a14cfd"
+        },
+        {
+            "name": "lback_calcaneous",
+            "id": 9,
+            "color": "#e0899f"
+        },
+        {
+            "name": "rback_calcaneous",
+            "id": 10,
+            "color": "#fe193b"
+        },
+        {
+            "name": "back_left_foot_back",
+            "id": 11,
+            "color": "#3c9b28"
+        },
+        {
+            "name": "back_right_foot_back",
+            "id": 12,
+            "color": "#3b5aa5"
+        },
+        {
+            "name": "front_left_foot_back",
+            "id": 13,
+            "color": "#dd8aaf"
+        },
+        {
+            "name": "front_right_foot_back",
+            "id": 14,
+            "color": "#bb85bc"
+        },
+        {
+            "name": "lfront_knee",
+            "id": 15,
+            "color": "#def60d"
+        },
+        {
+            "name": "rfront_knee",
+            "id": 16,
+            "color": "#63852f"
+        },
+        {
+            "name": "lear_tip",
+            "id": 17,
+            "color": "#adae9d"
+        },
+        {
+            "name": "rear_tip",
+            "id": 18,
+            "color": "#840f26"
+        },
+        {
+            "name": "tail_start",
+            "id": 19,
+            "color": "#6a1a1b"
+        },
+        {
+            "name": "tail_tip",
+            "id": 20,
+            "color": "#52cb2d"
+        },
+        {
+            "name": "half_tail",
+            "id": 21,
+            "color": "#51a650"
+        },
+        {
+            "name": "lear_base_back",
+            "id": 22,
+            "color": "#494114"
+        },
+        {
+            "name": "rear_base_back",
+            "id": 23,
+            "color": "#8a3355"
+        },
+        {
+            "name": "lear_base_front_internal",
+            "id": 24,
+            "color": "#6376d6"
+        },
+        {
+            "name": "lear_base_front_external",
+            "id": 25,
+            "color": "#52b612"
+        },
+        {
+            "name": "rear_base_front_internal",
+            "id": 26,
+            "color": "#0abce6"
+        },
+        {
+            "name": "rear_base_front_external",
+            "id": 27,
+            "color": "#066c65"
+        },
+        {
+            "name": "between_nostrils_base",
+            "id": 28,
+            "color": "#d06855"
+        },
+        {
+            "name": "lnostril",
+            "id": 29,
+            "color": "#f6892f"
+        },
+        {
+            "name": "rnostril",
+            "id": 30,
+            "color": "#bbe751"
+        },
+        {
+            "name": "leye",
+            "id": 31,
+            "color": "#85c184"
+        },
+        {
+            "name": "reye",
+            "id": 32,
+            "color": "#dfa99d"
+        },
+        {
+            "name": "rcalcaneous",
+            "id": 33,
+            "color": "#2480ef"
+        },
+        {
+            "name": "lcalcaneous",
+            "id": 34,
+            "color": "#4f2aa2"
+        },
+        {
+            "name": "lfront_coffin",
+            "id": 35,
+            "color": "#b91157"
+        },
+        {
+            "name": "rfront_coffin",
+            "id": 36,
+            "color": "#3b0f30"
+        },
+        {
+            "name": "lback_coffin",
+            "id": 37,
+            "color": "#5b9189"
+        },
+        {
+            "name": "rback_coffin",
+            "id": 38,
+            "color": "#b5aa2b"
+        },
+        {
+            "name": "end_sacral_vertebrae",
+            "id": 39,
+            "color": "#29fc33"
+        },
+        {
+            "name": "rcarpus_back",
+            "id": 40,
+            "color": "#26f578"
+        },
+        {
+            "name": "lcarpus_back",
+            "id": 41,
+            "color": "#e68892"
+        },
+        {
+            "name": "tip_of_head",
+            "id": 42,
+            "color": "#2592a3"
+        },
+        {
+            "name": "rposterior",
+            "id": 43,
+            "color": "#de8c38"
+        },
+        {
+            "name": "lposterior",
+            "id": 44,
+            "color": "#94c4e3"
+        },
+        {
+            "name": "middle_back",
+            "id": 45,
+            "color": "#ffd77f"
         }
     ],
-    "default": 2,
+    "default": 0,
     "type": "object_detection",
     "format": "vertices",
     "created_with": {
