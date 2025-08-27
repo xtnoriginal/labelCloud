@@ -51,6 +51,7 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.pcd_manager: PointCloudManger = None  # type: ignore
         self.bbox_controller: BoundingBoxController = None  # type: ignore
         self.unified_annotation_controller: UnifiedAnnotationController = None
+ 
 
         # Objects to be drawn
         self.crosshair_pos: Point2D = (0, 0)

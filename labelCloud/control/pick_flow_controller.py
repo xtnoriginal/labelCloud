@@ -40,7 +40,7 @@ def has_active_point_decorator(func):
     return wrapper
 
 
-class PickPointController(object):
+class PickFlowController(object):
     """
     Controller for managing picked points in the 3D point cloud.
     It handles the registration of points and their visualization.

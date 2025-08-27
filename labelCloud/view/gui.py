@@ -188,6 +188,7 @@ class GUI(QtWidgets.QMainWindow):
         self.button_span_bbox: QtWidgets.QPushButton
         self.button_save_label: QtWidgets.QPushButton
         self.button_pick_point: QtWidgets.QPushButton
+        self.button_pick_flow: QtWidgets.QPushButton
 
         # RIGHT PANEL
         self.label_list: QtWidgets.QListWidget
@@ -349,6 +350,13 @@ class GUI(QtWidgets.QMainWindow):
                 SpanningStrategy(self)
             )
         )
+        
+        self.button_pick_flow.clicked.connect(
+            lambda: self.controller.drawing_mode.set_drawing_strategy(
+                PickingPointStrategy(self)
+            )
+        )
+        
         self.button_save_label.clicked.connect(self.controller.save)
 
         # BOUNDING BOX PARAMETER

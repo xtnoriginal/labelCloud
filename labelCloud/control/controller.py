@@ -13,6 +13,7 @@ from ..view.gui import GUI
 from .alignmode import AlignMode
 from .bbox_controller import BoundingBoxController
 from .pick_point_controller import PickPointController
+from .pick_flow_controller import PickFlowController
 from .config_manager import config
 from .drawing_manager import DrawingManager
 from .pcd_manager import PointCloudManger
@@ -32,9 +33,10 @@ class Controller:
         self.unified_annotation_controller = UnifiedAnnotationController()
         self.bbox_controller = BoundingBoxController()
         self.pick_point_controller = PickPointController()
+        self.pick_flow_controller = PickFlowController()
 
         # Drawing states
-        self.drawing_mode = DrawingManager(self.bbox_controller,self.pick_point_controller)
+        self.drawing_mode = DrawingManager(self.bbox_controller,self.pick_point_controller, self.pick_flow_controller)
         self.align_mode = AlignMode(self.pcd_manager)
 
         # Control states
@@ -52,6 +54,7 @@ class Controller:
         self.view = view
         self.bbox_controller.set_view(self.view)
         self.pick_point_controller.set_view(self.view)
+        self.pick_flow_controller.set_view(self.view)
         self.pcd_manager.set_view(self.view)
         self.drawing_mode.set_view(self.view)
         self.align_mode.set_view(self.view)
@@ -61,7 +64,9 @@ class Controller:
         self.pick_point_controller.unified_annotation_controller = self.unified_annotation_controller
         self.pick_point_controller.pcd_manager = self.pcd_manager
         self.unified_annotation_controller.set_view(self.view)
-
+        self.pick_flow_controller.unified_annotation_controller = self.unified_annotation_controller
+        self.pick_flow_controller.pcd_manager = self.pcd_manager
+    
 
         # Read labels from folders
         self.pcd_manager.read_pointcloud_folder()
@@ -81,7 +86,6 @@ class Controller:
             previous_unified_bbox_point = self.unified_annotation_controller.items
             self.pcd_manager.get_next_pcd()
             self.reset()
-            #self.bbox_controller.set_bboxes(self.pcd_manager.get_labels_from_file())
 
             self.unified_annotation_controller.set_items(self.pcd_manager.get_labels_from_file())
             self.update_curr_class()

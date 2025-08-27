@@ -3,7 +3,7 @@
         {
             "name": "unassigned",
             "id": 0,
-            "color": "#9da2ab"
+            "color": "#ff6ee6"
         },
         {
             "name": "background",
@@ -128,7 +128,7 @@
         {
             "name": "lear_base_front_external",
             "id": 25,
-            "color": "#52b612"
+            "color": "#fff229"
         },
         {
             "name": "rear_base_front_internal",

@@ -4,22 +4,36 @@
 	"path": "pointclouds/exemplary.ply",
 	"objects": [
 		{
-			"name": "cart",
-			"centroid": {
-				"x": -0.1908196,
-				"y": -0.23602801,
-				"z": 0.08046184
-			},
-			"dimensions": {
-				"length": 0.75,
-				"width": 0.55,
-				"height": 0.15
-			},
-			"rotations": {
-				"x": 0,
-				"y": 0,
-				"z": 235
-			}
+			"name": "unassigned",
+			"point": [
+				0.18906018,
+				-0.16431077,
+				0.00075082
+			]
+		},
+		{
+			"name": "unassigned",
+			"point": [
+				0.09249982,
+				-0.13109834,
+				0.13237104
+			]
+		},
+		{
+			"name": "unassigned",
+			"point": [
+				0.08608521,
+				-0.06752718,
+				0.12076201
+			]
+		},
+		{
+			"name": "unassigned",
+			"point": [
+				-0.97328329,
+				-0.18338738,
+				-0.00361666
+			]
 		}
 	]
 }

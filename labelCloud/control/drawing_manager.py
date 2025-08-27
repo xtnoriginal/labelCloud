@@ -4,17 +4,19 @@ from typing import TYPE_CHECKING, Union
 from ..labeling_strategies import BaseLabelingStrategy
 from .bbox_controller import BoundingBoxController
 from .pick_point_controller import PickPointController
+from .pick_flow_controller import PickFlowController
 
 if TYPE_CHECKING:
     from ..view.gui import GUI
 
 
 class DrawingManager(object):
-    def __init__(self, bbox_controller: BoundingBoxController, pick_point_controller: PickPointController ) -> None:
+    def __init__(self, bbox_controller: BoundingBoxController, pick_point_controller: PickPointController, pick_flow_controller : PickFlowController ) -> None:
         self.view: "GUI"
         self.bbox_controller = bbox_controller
         self.drawing_strategy: Union[BaseLabelingStrategy, None] = None
         self.pick_point_controller = pick_point_controller
+        self.pick_flow_controller = pick_flow_controller
 
     def set_view(self, view: "GUI") -> None:
         self.view = view
@@ -51,11 +53,15 @@ class DrawingManager(object):
             self.drawing_strategy.register_tmp_point(world_point)
         else:
             self.drawing_strategy.register_point(world_point)
+            
             # If the strategy is a point picking strategy, we add the point to the pick point controller
-            if(self.drawing_strategy.__class__.__name__== "PickingPointStrategy"):
+            if self.drawing_strategy.__class__.__name__== "PickingFlowStrategy":
+                pass
+            elif(self.drawing_strategy.__class__.__name__== "PickingPointStrategy"):
                 self.pick_point_controller.add_point(self.drawing_strategy.get_point())
                 self.drawing_strategy.reset()
-                self.drawing_strategy = None
+                self.drawing_strategy = None 
+                
             elif (
                 self.drawing_strategy.is_bbox_finished()
             ):  # Register bbox to bbox controller when finished
