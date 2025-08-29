@@ -17,6 +17,7 @@ class DrawingManager(object):
         self.drawing_strategy: Union[BaseLabelingStrategy, None] = None
         self.pick_point_controller = pick_point_controller
         self.pick_flow_controller = pick_flow_controller
+        self.index = 1
 
     def set_view(self, view: "GUI") -> None:
         self.view = view
@@ -55,8 +56,11 @@ class DrawingManager(object):
             self.drawing_strategy.register_point(world_point)
             
             # If the strategy is a point picking strategy, we add the point to the pick point controller
-            if self.drawing_strategy.__class__.__name__== "PickingFlowStrategy":
-                pass
+            if self.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_strategy.pick_flow:
+                self.pick_point_controller.add_point(self.drawing_strategy.get_point())
+                self.move_to_next_class(self.view.current_class_dropdown.currentIndex())
+                print("moved to next class")
+     
             elif(self.drawing_strategy.__class__.__name__== "PickingPointStrategy"):
                 self.pick_point_controller.add_point(self.drawing_strategy.get_point())
                 self.drawing_strategy.reset()
@@ -78,3 +82,14 @@ class DrawingManager(object):
             self.drawing_strategy.reset()  # type: ignore
             if not points_only:
                 self.drawing_strategy = None
+
+
+    def move_to_next_class(self, index):
+        # only move if valid index
+        if index >= 0:
+            next_index = index + 1
+            self.index += 1
+            print("next index:", next_index, self.view.current_class_dropdown.count())
+            if next_index < self.view.current_class_dropdown.count():
+                # set next class
+                self.view.current_class_dropdown.setCurrentIndex(self.index)

@@ -16,7 +16,7 @@ class PickingPointStrategy(BaseLabelingStrategy):
     POINTS_NEEDED = 1
     PREVIEW = True
 
-    def __init__(self, view: "GUI") -> None:
+    def __init__(self, view: "GUI", pick_flow = True) -> None:
         super().__init__(view)
         logging.info("Enabled drawing mode.")
         self.view.status_manager.update_status(
@@ -36,6 +36,8 @@ class PickingPointStrategy(BaseLabelingStrategy):
         # Initialize KDTree
         self.pcd_tree  = o3d.geometry.KDTreeFlann()
         self.pcd_tree.set_geometry(pcd)
+        
+        self.pick_flow = pick_flow
 
     def register_point(self, new_point: Point3D) -> None:
         print("register_point called with:", new_point)

@@ -531,3 +531,12 @@ class Controller:
         controller = self.active_controller() 
         if controller:
             controller.translate_along_z(down=down)
+
+    
+    def move_to_next_class(self, index):
+        # only move if valid index
+        if index >= 0:
+            next_index = index + 1
+            if next_index < self.view.current_class_dropdown.count():
+                # set next class
+                self.view.current_class_dropdown.setCurrentIndex(next_index)

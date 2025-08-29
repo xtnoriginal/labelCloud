@@ -353,7 +353,7 @@ class GUI(QtWidgets.QMainWindow):
         
         self.button_pick_flow.clicked.connect(
             lambda: self.controller.drawing_mode.set_drawing_strategy(
-                PickingPointStrategy(self)
+                PickingPointStrategy(self, True)
             )
         )
         
