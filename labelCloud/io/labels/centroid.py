@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Union
 from ...model import BBox, Point
 from . import BaseLabelFormat, abs2rel_rotation, rel2abs_rotation
 
+from .config import LabelConfig
 
 class CentroidFormat(BaseLabelFormat):
     FILE_ENDING = ".json"
@@ -16,6 +17,7 @@ class CentroidFormat(BaseLabelFormat):
         data["folder"] = pcd_path.parent.name
         data["filename"] = pcd_path.name
         data["path"] = str(pcd_path)
+        data["annotator"] = LabelConfig().get_user_name()
 
         # Labels
         data["objects"] = []

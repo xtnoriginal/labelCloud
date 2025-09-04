@@ -10,6 +10,8 @@ from ...definitions import Point3D
 from ...model import BBox, Point
 from ...utils import math3d
 
+from .config import LabelConfig
+
 
 class VerticesFormat(BaseLabelFormat):
     FILE_ENDING = ".json"
@@ -45,7 +47,8 @@ class VerticesFormat(BaseLabelFormat):
 
                 elif "point" in label:  # Point
                     x, y, z = label["point"]
-                    point = Point((x, y, z))
+                    point_idx = label["point_idx"]
+                    point = Point((x, y, z), point_idx)
                     point.set_classname(label["name"])
                     labels.append(point)
 
@@ -59,6 +62,7 @@ class VerticesFormat(BaseLabelFormat):
         data["folder"] = pcd_path.parent.name
         data["filename"] = pcd_path.name
         data["path"] = str(pcd_path)
+        data["annotator"] = LabelConfig().get_user_name()
 
         data["objects"] = []
         for label in labels:
@@ -69,8 +73,12 @@ class VerticesFormat(BaseLabelFormat):
                 obj["vertices"] = self.round_dec(label.get_vertices().tolist())
             elif isinstance(label, Point):
                 obj["point"] = self.round_dec(label.get_coords())
+                obj["point_idx"] =  label.point_id
 
             data["objects"].append(obj)
+        
+
+        self.export_labels_horse_extension(labels, pcd_path)
 
         label_path = self.save_label_to_file(pcd_path, data)
         logging.info(
@@ -78,3 +86,32 @@ class VerticesFormat(BaseLabelFormat):
             f"in {self.__class__.__name__} formatting!"
         )
 
+
+    def export_labels_horse_extension(self, labels: List[Union[BBox, Point]], pcd_path: Path):
+        data: Dict[str, Any] = dict()
+        meta : Dict[str, Any] = dict()
+        meta["folder"] = pcd_path.parent.name
+        meta["filename"] = pcd_path.name
+        meta["path"] = str(pcd_path)
+        meta["annotator"] = LabelConfig().get_user_name()
+
+        data["metadata"] = meta
+        data["keypoints"] = []
+
+        for label in labels:
+            obj: Dict[str, Any] = dict()
+            label.get_classname()
+
+            if isinstance(label, BBox):
+                continue
+            elif isinstance(label, Point):
+                obj[label.get_classname()] = self.round_dec(label.get_coords())
+                obj["PCD_point_index"] = label.point_id
+
+            data["keypoints"].append(obj)
+
+        label_path = self.save_label_to_file(pcd_path, data, file_name_ext="mpi_horse_ext")
+        logging.info(
+            f"Exported {len(labels)} labels to {label_path} "
+            f"in {self.__class__.__name__} formatting!"
+        )

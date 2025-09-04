@@ -878,7 +878,7 @@
         </property>
        </spacer>
       </item>
-     </layout>
+    </layout>
     </item>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -1596,6 +1596,25 @@
         </property>
        </widget>
       </item>
+      <item>
+        <widget class="QLabel" name="label_flow_status">
+          <property name="text">
+            <string>Flow not selected</string>
+          </property>
+          <property name="visible">
+            <bool>true</bool> <!-- start hidden -->
+          </property>
+           <property name="alignment">
+              <set>Qt::AlignCenter</set>
+           </property>
+           <property name="font">
+              <font>
+                <pointsize>20</pointsize> <!-- increase font size -->
+              </font>
+          </property>
+        </widget>
+      </item>
+
       <item>
        <spacer name="verticalSpacer_3">
         <property name="orientation">

@@ -25,11 +25,12 @@ class Point(object):
 
     def __init__(
         self,
-        point: Point3D
+        point: Point3D, 
+        point_id : int
     ) -> None:
-        self.point: Point3D = point
-    
+        self.point: Point3D = point 
         self.classname: str = LabelConfig().get_default_class_name()
+        self.point_id = point_id
 
     # GETTERS
 
@@ -47,7 +48,19 @@ class Point(object):
     def set_classname(self, classname: str) -> None:
         if classname:
             self.classname = classname
- 
+    
+
+    def set_x_rotation(self, angle: float) -> None:
+        pass
+
+    def set_y_rotation(self, angle: float) -> None:
+        pass
+
+    def set_z_rotation(self, angle: float) -> None:
+        s
+        pass
+
+
     
     def set_x_translation(self, x_translation: float) -> None:
         self.point = (x_translation, *self.point[1:])

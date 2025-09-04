@@ -6,7 +6,7 @@ import numpy as np
 import numpy.typing as npt
 import OpenGL.GL as GL
 from OpenGL import GLU
-from PyQt5 import QtGui, QtOpenGL
+from PyQt5 import QtGui, QtOpenGL, QtCore
 
 from ..control.alignmode import AlignMode
 from ..control.unified_annotation_controller import UnifiedAnnotationController
@@ -59,6 +59,8 @@ class GLWidget(QtOpenGL.QGLWidget):
         self.selected_side_vertices: npt.NDArray = np.array([])
         self.drawing_mode: DrawingManager = None  # type: ignore
         self.align_mode: Union[AlignMode, None] = None
+
+        self.current_label_text: Optional[str] = None
 
     def set_pointcloud_controller(self, pcd_manager: PointCloudManger) -> None:
         self.pcd_manager = pcd_manager
@@ -126,9 +128,7 @@ class GLWidget(QtOpenGL.QGLWidget):
                 oglhelper.draw_rectangles(
                     self.selected_side_vertices, color=(0, 1, 0, 0.3)
                 )
-
-
-
+        
         if self.unified_annotation_controller.has_active_item():
             self.unified_annotation_controller.get_active_item().draw(highlighted=True) 
 
@@ -140,6 +140,7 @@ class GLWidget(QtOpenGL.QGLWidget):
             label.draw()
 
         GL.glPopMatrix()  # restore the previous modelview matrix
+
 
     # Translates the 2D cursor position from screen plane into 3D world space coordinates
     def get_world_coords(
@@ -174,6 +175,12 @@ class GLWidget(QtOpenGL.QGLWidget):
             x, real_y, z, self.modelview, self.projection, viewport
         )
         return mod_x, mod_y, mod_z
+    
+
+    def set_current_label(self, text: Optional[str]) -> None:
+        """Set the label text to display at the bottom of the widget."""
+        self.current_label_text = text
+        self.update()  # force repaint
 
 
 # Creates a circular mask with radius around center
@@ -206,3 +213,4 @@ def depth_smoothing(depths, center, r=15) -> float:
     ).all():  # prevent mean of empty slice
         return 1
     return np.nanmedian(selected_depths[selected_depths < 1])
+

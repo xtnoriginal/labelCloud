@@ -50,6 +50,7 @@ class LabelConfig(object, metaclass=SingletonABCMeta):
         self.default: int
         self.type: LabelingMode
         self.format: BaseLabelFormat
+        self.user_name: str = "unknown"
 
         if getattr(self, "_loaded", False) != True:
             self.load_config()
@@ -145,8 +146,13 @@ class LabelConfig(object, metaclass=SingletonABCMeta):
         raise DefaultIdMismatchException(
             f"Default class id `{self.default}` is missing in the class list."
         )
+    
+    def get_user_name(self):
+        return self.user_name
 
     # SETTERS
+    def set_user_name(self, user_name):
+        self.user_name = user_name
 
     def set_first_as_default(self) -> None:
         self.default = self.classes[0].id

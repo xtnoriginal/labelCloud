@@ -43,8 +43,8 @@ class BaseLabelFormat(ABC):
             decimal_places = self.export_precision
         return np.round(x, decimal_places).tolist()
 
-    def save_label_to_file(self, pcd_path: Path, data: Union[dict, str]) -> Path:
-        label_path = self.label_folder.joinpath(pcd_path.stem + self.FILE_ENDING)
+    def save_label_to_file(self, pcd_path: Path, data: Union[dict, str], file_name_ext:str="") -> Path:
+        label_path = self.label_folder.joinpath(pcd_path.stem +file_name_ext+self.FILE_ENDING)
 
         if label_path.is_file():
             logging.info("File %s already exists, replacing file ..." % label_path)

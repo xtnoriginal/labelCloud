@@ -59,7 +59,6 @@ class DrawingManager(object):
             if self.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_strategy.pick_flow:
                 self.pick_point_controller.add_point(self.drawing_strategy.get_point())
                 self.move_to_next_class(self.view.current_class_dropdown.currentIndex())
-                print("moved to next class")
      
             elif(self.drawing_strategy.__class__.__name__== "PickingPointStrategy"):
                 self.pick_point_controller.add_point(self.drawing_strategy.get_point())
@@ -86,10 +85,19 @@ class DrawingManager(object):
 
     def move_to_next_class(self, index):
         # only move if valid index
-        if index >= 0:
+
+        print(self.view.current_class_dropdown.itemText(self.index))
+
+        if self.index+1 == self.view.current_class_dropdown.count():
+            self.index = 1
+            self.reset()
+
+        elif index >= 0:
             next_index = index + 1
             self.index += 1
             print("next index:", next_index, self.view.current_class_dropdown.count())
             if next_index < self.view.current_class_dropdown.count():
                 # set next class
                 self.view.current_class_dropdown.setCurrentIndex(self.index)
+                self.view.gl_widget.set_current_label(self.view.current_class_dropdown.itemText(self.index))
+                self.view.set_label_flow_status(self.view.current_class_dropdown.itemText(self.index + 1))

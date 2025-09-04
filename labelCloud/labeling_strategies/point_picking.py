@@ -16,14 +16,15 @@ class PickingPointStrategy(BaseLabelingStrategy):
     POINTS_NEEDED = 1
     PREVIEW = True
 
-    def __init__(self, view: "GUI", pick_flow = True) -> None:
+    def __init__(self, view: "GUI", pick_flow = False) -> None:
         super().__init__(view)
         logging.info("Enabled drawing mode.")
         self.view.status_manager.update_status(
             "Please pick the location for the bounding box front center.",
             mode=Mode.DRAWING,
         )
-        self.point_1: Optional[Point3D] = None 
+        self.point_1: Optional[Point3D] = None
+        self.point_idx: int = None 
         self.tmp_p1: Optional[Point3D] = None
         self.bbox_z_rotation: float = 0
         self.preview_color = (1, 1, 0, 1)
@@ -39,12 +40,16 @@ class PickingPointStrategy(BaseLabelingStrategy):
         
         self.pick_flow = pick_flow
 
+        if pick_flow:
+            self.view.set_label_flow_status(self.view.current_class_dropdown.itemText(2))
+
     def register_point(self, new_point: Point3D) -> None:
         print("register_point called with:", new_point)
         if not self.tmp_p1 == None :
             k, idx, dist= self.pcd_tree.search_knn_vector_3d(new_point,1);
             if idx:
                 self.point_1 = self.view.controller.pcd_manager.pointcloud.points[idx[0]]
+                self.point_idx = idx[0]
                 self.points_registered += 1
                                                                          
     def register_tmp_point(self, new_tmp_point: Point3D) -> None:
@@ -61,7 +66,12 @@ class PickingPointStrategy(BaseLabelingStrategy):
                                                 
     def get_point(self) -> Point3D: 
         assert self.point_1 is not None
-        return Point(self.point_1)
+        return Point(self.point_1, self.point_idx)
+    
+
+    def get_point_idx(self)->int:
+        assert self.point_idx is not None
+        return self.point_id
     
     def get_selected_point(self):
         return self.point_1

@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (
     QScrollArea,
     QSizePolicy,
     QVBoxLayout,
+    QLineEdit
 )
 
 from ...io.labels.config import LabelConfig
@@ -59,6 +60,9 @@ class StartupDialog(QDialog):
 
         # 3. Row: Select label export format
         self.add_default_and_export_format(main_layout)
+
+        # 3.5 Row: User name input
+        self.add_user_row(main_layout)
 
         # 4. Row: Buttons to save or cancel
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Save)
@@ -161,6 +165,11 @@ class StartupDialog(QDialog):
         LabelConfig().set_default_class(self.default_label.currentText())
         LabelConfig().set_label_format(self.label_export_format.currentText())
 
+        # Store user name as metadata (extend LabelConfig to support this if not already)
+        LabelConfig().set_user_name(self.user_name_input.text().strip())
+
+
+
     def _save_class_labels(self) -> None:
         LabelConfig().validate()
         LabelConfig().save_config()
@@ -210,3 +219,15 @@ class StartupDialog(QDialog):
         msg.setDefaultButton(QMessageBox.Cancel)
 
         msg.exec_()
+
+
+
+    def add_user_row(self, parent_layout: QVBoxLayout) -> None:
+        row = QHBoxLayout()
+        row.addWidget(QLabel("Your Name:"))
+
+        self.user_name_input = QLineEdit()
+        self.user_name_input.setPlaceholderText("Enter your name")
+        row.addWidget(self.user_name_input, 2)
+
+        parent_layout.addLayout(row)

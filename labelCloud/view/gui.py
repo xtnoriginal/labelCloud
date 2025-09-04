@@ -197,6 +197,8 @@ class GUI(QtWidgets.QMainWindow):
         self.button_delete_label: QtWidgets.QPushButton
         self.button_assign_label: QtWidgets.QPushButton
 
+        self.label_flow_status: QLabel
+
         # label list actions
         # self.act_rename_class = QtWidgets.QAction("Rename class") #TODO: Implement!
         self.act_change_class_color = QtWidgets.QAction("Change class color")
@@ -409,6 +411,15 @@ class GUI(QtWidgets.QMainWindow):
         self.act_change_settings.triggered.connect(self.show_settings_dialog)
 
 
+
+
+    def update_flow_label(self, checked):
+        if checked:
+            self.label_flow_status.setText("Flow selected")
+            self.label_flow_status.setVisible(True)
+        else:
+            self.label_flow_status.setVisible(False)  # hides it completel
+
     def set_checkbox_states(self) -> None:
         self.act_propagate_labels.setChecked(
             config.getboolean("LABEL", "propagate_labels")
@@ -523,6 +534,10 @@ class GUI(QtWidgets.QMainWindow):
         msg.exec_()
 
     # VISUALIZATION METHODS
+
+    def set_label_flow_status(self, status:str):
+        self.label_flow_status.setText(status)
+
 
     def set_pcd_label(self, pcd_name: str) -> None:
         self.label_current_pcd.setText("Current: <em>%s</em>" % pcd_name)
