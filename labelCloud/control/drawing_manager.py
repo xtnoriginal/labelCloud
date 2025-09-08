@@ -86,18 +86,15 @@ class DrawingManager(object):
     def move_to_next_class(self, index):
         # only move if valid index
 
-        print(self.view.current_class_dropdown.itemText(self.index))
-
-        if self.index+1 == self.view.current_class_dropdown.count():
-            self.index = 1
-            self.reset()
-
-        elif index >= 0:
-            next_index = index + 1
-            self.index += 1
-            print("next index:", next_index, self.view.current_class_dropdown.count())
-            if next_index < self.view.current_class_dropdown.count():
-                # set next class
-                self.view.current_class_dropdown.setCurrentIndex(self.index)
-                self.view.gl_widget.set_current_label(self.view.current_class_dropdown.itemText(self.index))
-                self.view.set_label_flow_status(self.view.current_class_dropdown.itemText(self.index + 1))
+        next_index = index + 1
+        self.index += 1
+        
+        if next_index < self.view.current_class_dropdown.count():
+            # set next class
+            self.view.current_class_dropdown.setCurrentIndex(self.index)
+            self.view.gl_widget.set_current_label(self.view.current_class_dropdown.itemText(self.index))
+            self.view.set_label_flow_status(self.view.current_class_dropdown.itemText(self.index + 1))
+                
+            if self.index+1 == self.view.current_class_dropdown.count():
+                self.index = 1
+                self.reset() 
