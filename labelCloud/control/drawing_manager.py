@@ -81,6 +81,15 @@ class DrawingManager(object):
             self.drawing_strategy.reset()  # type: ignore
             if not points_only:
                 self.drawing_strategy = None
+                
+    
+    def undo(self):
+        
+        if self.index > 1:
+            self.index -= 1
+            self.view.set_label_flow_status(self.view.current_class_dropdown.itemText(self.index + 1))
+            
+            
 
 
     def move_to_next_class(self, index):

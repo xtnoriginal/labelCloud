@@ -68,6 +68,10 @@ class StartupDialog(QDialog):
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Save)
         self.buttonBox.accepted.connect(self.save)
         self.buttonBox.rejected.connect(self.reject)
+        
+        save_button = self.buttonBox.button(QDialogButtonBox.Save)
+        if save_button:
+            save_button.setText("Continue")
 
         main_layout.addWidget(self.buttonBox)
 

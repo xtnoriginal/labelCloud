@@ -300,10 +300,21 @@ class Controller:
         else:
             self.pcd_manager.zoom_into(a0.angleDelta().y())
             self.scroll_mode = True
-
+ 
     def key_press_event(self, a0: QtGui.QKeyEvent) -> None:
         """Triggers actions when the user presses a key."""
         controller = self.active_controller()
+        
+        
+        # ----- UNDO / REDO -----
+        if a0.key() == Keys.Key_Z: #
+            # Ctrl+Z => Undo
+            print("Undo last action")
+            self.unified_annotation_controller.delete_last_item()
+            if self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_mode.drawing_strategy.pick_flow:
+                self.drawing_mode.undo()
+            return
+        
         # Reset position to intial value
         if a0.key() == Keys.Key_Control:
             self.ctrl_pressed = True
@@ -333,21 +344,26 @@ class Controller:
                 logging.info("Resetted selected points!")
 
         # BBOX MANIPULATION
-        elif a0.key() == Keys.Key_Z:
-            # z rotate counterclockwise
-            self.bbox_controller.rotate_around_z()
+        # elif a0.key() == Keys.Key_Z:
+        #     # z rotate counterclockwise
+        #     if isinstance(controller, BoundingBoxController):
+        #         self.bbox_controller.rotate_around_z()
         elif a0.key() == Keys.Key_X:
-            # z rotate clockwise
-            self.bbox_controller.rotate_around_z(clockwise=True)
+            if isinstance(controller, BoundingBoxController):
+                # z rotate clockwise
+                self.bbox_controller.rotate_around_z(clockwise=True)
         elif a0.key() == Keys.Key_C:
-            # y rotate counterclockwise
-            self.bbox_controller.rotate_around_y()
+            if isinstance(controller, BoundingBoxController):
+                # y rotate counterclockwise
+                self.bbox_controller.rotate_around_y()
         elif a0.key() == Keys.Key_V:
-            # y rotate clockwise
-            controller.rotate_around_y(clockwise=True)
+            if isinstance(controller, BoundingBoxController):
+                # y rotate clockwise
+                controller.rotate_around_y(clockwise=True)
         elif a0.key() == Keys.Key_B:
-            # x rotate counterclockwise
-            self.bbox_controller.rotate_around_x()
+            if isinstance(controller, BoundingBoxController):
+                # x rotate counterclockwise
+                self.bbox_controller.rotate_around_x()
         elif a0.key() == Keys.Key_N:
             # x rotate clockwise
             controller.rotate_around_x(clockwise=True)
@@ -448,6 +464,7 @@ class Controller:
         item = self.unified_annotation_controller.get_active_item()
 
         if not isinstance(item, BBox):
+            
             return 
         
         bbox = item

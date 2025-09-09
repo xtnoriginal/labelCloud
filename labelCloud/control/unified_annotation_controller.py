@@ -38,6 +38,13 @@ class UnifiedAnnotationController:
         self.items = items
         self.active_index = -1
         self.update_label_list()
+        
+    def  delete_last_item(self) -> None:
+        """Deletes the last added bounding box or point."""
+        if self.items:
+            self.items.pop()
+            self.active_index = len(self.items) - 1 if self.items else None
+            self.update_label_list()
 
    
     
