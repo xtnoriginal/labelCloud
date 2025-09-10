@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 import numpy as np
-from PyQt5 import QtGui
+from PyQt5 import QtGui,QtCore
 from PyQt5.QtCore import QPoint
 from PyQt5.QtCore import Qt as Keys
 
@@ -18,6 +18,7 @@ from .config_manager import config
 from .drawing_manager import DrawingManager
 from .pcd_manager import PointCloudManger
 from .unified_annotation_controller import UnifiedAnnotationController
+
 
 from ..model.bbox import BBox
 
@@ -197,14 +198,15 @@ class Controller:
     def mouse_clicked(self, a0: QtGui.QMouseEvent) -> None:
         """Triggers actions when the user clicks the mouse."""
         self.last_cursor_pos = a0.pos()
+
+        print(self.drawing_mode.drawing_strategy.__class__.__name__)
+
+        if self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_mode.drawing_strategy.pick_flow:
+            if self.drawing_mode.is_active()and self.ctrl_pressed:
+                self.drawing_mode.register_point(a0.x(), a0.y(), correction=True)
+                print ("Register point in flow mode")
         
-        if (self.drawing_mode.is_active()and self.ctrl_pressed and self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_mode.drawing_strategy.pick_flow):
-            self.drawing_mode.register_point(a0.x(), a0.y(), correction=True)
-            print ("Register point in flow mode")
-            return
-        
-        
-        if (
+        elif (
             self.drawing_mode.is_active()
             and (a0.buttons() & Keys.LeftButton)
             and (not self.ctrl_pressed)
@@ -289,7 +291,11 @@ class Controller:
         if self.selected_side:
             self.side_mode = True
 
-        if (
+        
+        if self.drawing_mode.is_active() and self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_mode.drawing_strategy.pick_flow:
+            self.pcd_manager.zoom_into(a0.angleDelta().y())
+            self.scroll_mode = True
+        elif (
             self.drawing_mode.is_active()
             and (not self.ctrl_pressed)
             and self.drawing_mode.drawing_strategy is not None
@@ -313,7 +319,7 @@ class Controller:
         
         
         # ----- UNDO / REDO -----
-        if a0.key() == Keys.Key_Z: #
+        if (a0.key() == QtCore.Qt.Key_Z) and (a0.modifiers() & QtCore.Qt.ControlModifier): #
             # Ctrl+Z => Undo
             print("Undo last action")
             self.unified_annotation_controller.delete_last_item()

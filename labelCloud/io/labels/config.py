@@ -65,6 +65,7 @@ class LabelConfig(object, metaclass=SingletonABCMeta):
             self.default = data["default"]
             self.type = LabelingMode(data["type"])
             self.format = data["format"]
+            self.user_name = data.get("last_annotator", "unknown")
         else:
             self.classes = [ClassConfig("cart", 0, color=Color3f(1, 0, 0))]
             self.default = 0
@@ -77,6 +78,7 @@ class LabelConfig(object, metaclass=SingletonABCMeta):
         self.validate()
         data = {
             "classes": [c.to_dict() for c in self.classes],
+            "last_annotator": self.user_name,
             "default": self.default,
             "type": self.type.value,
             "format": self.format,

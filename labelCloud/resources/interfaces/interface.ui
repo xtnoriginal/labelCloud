@@ -986,6 +986,22 @@
                   </property>
               </widget>
           </item>
+
+          <item>
+            <widget class="QPushButton" name="add_class_button">
+              <property name="text">
+                <string>Add Class</string>
+              </property>
+              <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                </sizepolicy>
+              </property>
+            </widget>
+          </item>
+
+
          <item>
           <widget class="QLabel" name="current_bbox_title">
            <property name="sizePolicy">

@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import (
     QInputDialog,
     QLabel,
     QMessageBox,
+    QDialog,
 )
 
 from ..control.config_manager import config
@@ -160,6 +161,8 @@ class GUI(QtWidgets.QMainWindow):
         self.button_next_pcd: QtWidgets.QPushButton
         self.button_set_pcd: QtWidgets.QPushButton
         self.progressbar_pcds: QtWidgets.QProgressBar
+
+        self.add_class_button: QtWidgets.QPushButton
 
         self.icon_bbox = QIcon(str(Path(__file__).parent.parent / "resources/icons/cube-outline.svg"))
         self.icon_point = QIcon(str(Path(__file__).parent.parent / "resources/icons/circle-medium.svg"))
@@ -360,6 +363,9 @@ class GUI(QtWidgets.QMainWindow):
         )
         
         self.button_save_label.clicked.connect(self.controller.save)
+
+
+        self.add_class_button.clicked.connect(self.add_new_class)
 
         # BOUNDING BOX PARAMETER
         self.edit_pos_x.editingFinished.connect(
@@ -697,6 +703,10 @@ class GUI(QtWidgets.QMainWindow):
         LabelConfig().set_default_class(action.text())
         logging.info("Changed default object class to %s.", action.text())
 
+
+
+
+
     def ask_custom_index(self):
         input_d = QInputDialog(self)
         self.input_pcd = input_d
@@ -746,3 +756,25 @@ class GUI(QtWidgets.QMainWindow):
             msg.setIcon(QMessageBox.Critical)
             msg.setStandardButtons(QMessageBox.Cancel)
             msg.exec_()
+
+
+    def add_new_class(self):
+        dialog = StartupDialog(self,mode="settings")
+        if dialog.exec_() == QDialog.Accepted:
+            # The dialog was confirmed (Continue button pressed)
+            selected_mode = LabelConfig().type
+            selected_classes = LabelConfig().classes
+            default_class = LabelConfig().get_default_class_name()
+            export_format = LabelConfig().format
+            user_name = LabelConfig().get_user_name()  # assuming you added this
+
+            self.update_current_class_dropdown()
+
+            print("User selected:")
+            print(" Mode:", selected_mode)
+            print(" Classes:", [c.name for c in selected_classes])
+            print(" Default:", default_class)
+            print(" Format:", export_format)
+            print(" User:", user_name)
+        else:
+            print("Startup dialog was cancelled")

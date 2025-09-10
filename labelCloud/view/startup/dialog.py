@@ -30,11 +30,17 @@ from .labeling_mode import SelectLabelingMode
 
 
 class StartupDialog(QDialog):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent=None, mode="startup") -> None:
         super().__init__(parent)
         self.parent_gui = parent
+        self.mode = mode
 
-        self.setWindowTitle("Welcome to labelCloud")
+        
+        if self.mode == "startup":
+            self.setWindowTitle("Welcome to labelCloud")
+        else:
+            self.setWindowTitle("Add and Edit Labels")
+
         screen_size = QDesktopWidget().availableGeometry(self).size()
         self.resize(screen_size * 0.5)
         self.setWindowIcon(
@@ -53,7 +59,8 @@ class StartupDialog(QDialog):
 
         # 1. Row: Selection of labeling mode via checkable buttons
         self.button_semantic_segmentation: QPushButton
-        self.add_labeling_mode_row(main_layout)
+        if self.mode == "startup":
+            self.add_labeling_mode_row(main_layout)
 
         # 2. Row: Definition of class labels
         self.add_class_definition_rows(main_layout)
@@ -71,7 +78,7 @@ class StartupDialog(QDialog):
         
         save_button = self.buttonBox.button(QDialogButtonBox.Save)
         if save_button:
-            save_button.setText("Continue")
+            save_button.setText("Continue" if self.mode == "startup" else "Save")
 
         main_layout.addWidget(self.buttonBox)
 
@@ -117,9 +124,10 @@ class StartupDialog(QDialog):
         row.addWidget(QLabel("Label export format:"))
 
         self.label_export_format = QComboBox()
-        self._update_label_formats()
-        self.label_export_format.setCurrentText(LabelConfig().format)
-        row.addWidget(self.label_export_format, 2)
+        if self.mode == "startup":
+            self._update_label_formats()
+            self.label_export_format.setCurrentText(LabelConfig().format)
+            row.addWidget(self.label_export_format, 2)
 
         parent_layout.addLayout(row)
 
@@ -162,12 +170,14 @@ class StartupDialog(QDialog):
     # ---------------------------------------------------------------------------- #
 
     def _populate_label_config(self) -> None:
-        LabelConfig().type = self.select_labeling_mode.selected_labeling_mode
+        if self.mode == "startup":
+            LabelConfig().type = self.select_labeling_mode.selected_labeling_mode
+            LabelConfig().set_label_format(self.label_export_format.currentText())
 
         LabelConfig().classes = self.label_list.get_class_configs()
 
         LabelConfig().set_default_class(self.default_label.currentText())
-        LabelConfig().set_label_format(self.label_export_format.currentText())
+            
 
         # Store user name as metadata (extend LabelConfig to support this if not already)
         LabelConfig().set_user_name(self.user_name_input.text().strip())
@@ -233,5 +243,7 @@ class StartupDialog(QDialog):
         self.user_name_input = QLineEdit()
         self.user_name_input.setPlaceholderText("Enter your name")
         row.addWidget(self.user_name_input, 2)
+
+        self.user_name_input.setText(LabelConfig().get_user_name())
 
         parent_layout.addLayout(row)
