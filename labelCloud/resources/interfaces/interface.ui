@@ -990,7 +990,7 @@
           <item>
             <widget class="QPushButton" name="add_class_button">
               <property name="text">
-                <string>Add Class</string>
+                <string>Add/ Edit Class</string>
               </property>
               <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
