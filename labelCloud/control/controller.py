@@ -197,7 +197,13 @@ class Controller:
     def mouse_clicked(self, a0: QtGui.QMouseEvent) -> None:
         """Triggers actions when the user clicks the mouse."""
         self.last_cursor_pos = a0.pos()
-
+        
+        if (self.drawing_mode.is_active()and self.ctrl_pressed and self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_mode.drawing_strategy.pick_flow):
+            self.drawing_mode.register_point(a0.x(), a0.y(), correction=True)
+            print ("Register point in flow mode")
+            return
+        
+        
         if (
             self.drawing_mode.is_active()
             and (a0.buttons() & Keys.LeftButton)
