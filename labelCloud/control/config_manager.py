@@ -55,6 +55,10 @@ class ConfigManager(object):
 
     def get_file_settings(self, key: str) -> str:
         return self.config["FILE"][key]
+    
+    def update_point_size(self, new_size: int) -> None:
+        self.config.set("POINTCLOUD", "POINT_SIZE", str(new_size))
+        self.write_into_file()
 
 
 config_manager = ConfigManager()

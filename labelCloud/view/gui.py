@@ -21,7 +21,7 @@ from PyQt5.QtWidgets import (
     QDialog,
 )
 
-from ..control.config_manager import config
+from ..control.config_manager import config,config_manager
 from ..definitions import Color3f, LabelingMode
 from ..io.labels.config import LabelConfig
 from ..io.pointclouds import BasePointCloudHandler
@@ -167,7 +167,8 @@ class GUI(QtWidgets.QMainWindow):
         self.icon_bbox = QIcon(str(Path(__file__).parent.parent / "resources/icons/cube-outline.svg"))
         self.icon_point = QIcon(str(Path(__file__).parent.parent / "resources/icons/circle-medium.svg"))
 
-
+        #Slider for point size
+        self.point_size_slider: QtWidgets.QSlider
 
         # bbox control section
         self.button_bbox_up: QtWidgets.QPushButton
@@ -192,6 +193,7 @@ class GUI(QtWidgets.QMainWindow):
         self.button_save_label: QtWidgets.QPushButton
         self.button_pick_point: QtWidgets.QPushButton
         self.button_pick_flow: QtWidgets.QPushButton
+        self.button_skip_label: QtWidgets.QPushButton
 
         # RIGHT PANEL
         self.label_list: QtWidgets.QListWidget
@@ -415,6 +417,11 @@ class GUI(QtWidgets.QMainWindow):
         self.act_save_perspective.toggled.connect(set_keep_perspective)
         self.act_align_pcd.toggled.connect(self.controller.align_mode.change_activation)
         self.act_change_settings.triggered.connect(self.show_settings_dialog)
+
+        #slider for point size
+        self.point_size_slider.valueChanged.connect(self.update_point_size)
+
+        self
 
 
 
@@ -777,4 +784,16 @@ class GUI(QtWidgets.QMainWindow):
             print(" Format:", export_format)
             print(" User:", user_name)
         else:
-            print("Startup dialog was cancelled")
+            print("Startup dialog was cancelled") 
+
+
+    
+    def update_point_size(self, new_size):
+
+        # Load the ini file
+        self.label_slider_value.setText(str(new_size))
+
+        config_manager.update_point_size(new_size)
+
+      
+

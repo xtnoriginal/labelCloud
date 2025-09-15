@@ -57,7 +57,6 @@ class Point(object):
         pass
 
     def set_z_rotation(self, angle: float) -> None:
-        s
         pass
 
 
@@ -78,7 +77,7 @@ class Point(object):
         point_color = LabelConfig().get_class_color(self.classname)
         if highlighted:
             point_color = self.HIGHLIGHTED_COLOR
-        oglhelper.draw_points([self.point], color=Color3f.to_rgba(point_color))
+        oglhelper.draw_points([self.point], color=Color3f.to_rgba(point_color), point_size=config.getint("POINTCLOUD", "POINT_SIZE")*2)
         GL.glPopMatrix()
         
 

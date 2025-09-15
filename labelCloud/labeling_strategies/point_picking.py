@@ -58,11 +58,15 @@ class PickingPointStrategy(BaseLabelingStrategy):
     def register_scrolling(self, distance: float) -> None:
         self.bbox_z_rotation += distance // 30
 
-    def draw_preview(self) -> None:  
+    def draw_preview(self) -> None: 
+        self.view.status_manager.update_status(
+                "Use Ctrl+Click to place marker", Mode.DRAWING
+            )
+ 
         if not self.tmp_p1 == None :
             k, idx, dist= self.pcd_tree.search_knn_vector_3d(self.tmp_p1,1);
             if idx:
-                ogl.draw_points([self.view.controller.pcd_manager.pointcloud.points[idx[0]]], color=self.preview_color)
+                ogl.draw_points([self.view.controller.pcd_manager.pointcloud.points[idx[0]]], color=self.preview_color, point_size=config.getint("POINTCLOUD", "POINT_SIZE")*2)
                                                 
     def get_point(self) -> Point3D: 
         assert self.point_1 is not None

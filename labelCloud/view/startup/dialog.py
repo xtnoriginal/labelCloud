@@ -66,9 +66,9 @@ class StartupDialog(QDialog):
         self.add_class_definition_rows(main_layout)
         
 
-        if  self.mode == "startup":
-            # 3. Row: Select label export format
-            self.add_default_and_export_format(main_layout)
+        
+        # 3. Row: Select label export format
+        self.add_default_and_export_format(main_layout)
 
         # 3.5 Row: User name input
         self.add_user_row(main_layout)
