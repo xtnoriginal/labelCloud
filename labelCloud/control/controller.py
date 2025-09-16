@@ -561,4 +561,5 @@ class Controller:
         if controller:
             controller.translate_along_z(down=down)
 
-    
+    def skip_label(self):
+        self.drawing_mode.move_to_next_class()

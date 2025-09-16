@@ -58,7 +58,7 @@ class DrawingManager(object):
             # If the strategy is a point picking strategy, we add the point to the pick point controller
             if self.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_strategy.pick_flow:
                 self.pick_point_controller.add_point(self.drawing_strategy.get_point())
-                self.move_to_next_class(self.view.current_class_dropdown.currentIndex())
+                self.move_to_next_class()
      
             elif(self.drawing_strategy.__class__.__name__== "PickingPointStrategy"):
                 self.pick_point_controller.add_point(self.drawing_strategy.get_point())
@@ -92,10 +92,10 @@ class DrawingManager(object):
             
 
 
-    def move_to_next_class(self, index):
+    def move_to_next_class(self):
         # only move if valid index
 
-        next_index = index + 1
+        next_index = self.index + 1
         self.index += 1
         
         if next_index < self.view.current_class_dropdown.count():

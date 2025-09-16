@@ -164,6 +164,7 @@ class GUI(QtWidgets.QMainWindow):
 
         self.add_class_button: QtWidgets.QPushButton
 
+
         self.icon_bbox = QIcon(str(Path(__file__).parent.parent / "resources/icons/cube-outline.svg"))
         self.icon_point = QIcon(str(Path(__file__).parent.parent / "resources/icons/circle-medium.svg"))
 
@@ -421,7 +422,7 @@ class GUI(QtWidgets.QMainWindow):
         #slider for point size
         self.point_size_slider.valueChanged.connect(self.update_point_size)
 
-        self
+        self.button_skip_label.clicked.connect(self.controller.skip_label)
 
 
 
