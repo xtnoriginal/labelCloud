@@ -562,4 +562,6 @@ class Controller:
             controller.translate_along_z(down=down)
 
     def skip_label(self):
-        self.drawing_mode.move_to_next_class()
+        #Check if in pick flow mode
+        if self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_mode.drawing_strategy.pick_flow:
+            self.drawing_mode.move_to_next_class()
