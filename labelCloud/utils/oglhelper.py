@@ -25,7 +25,7 @@ def draw_points(
     point_size: int = 10,
 ) -> None:
     GL.glColor4d(*color)
-    #  GL.glPointSize(max(1.0, point_size))
+    GL.glPointSize(max(1.0, point_size))
     GL.glBegin(GL.GL_POINTS)
     for point in points:
         GL.glVertex3d(*point)
