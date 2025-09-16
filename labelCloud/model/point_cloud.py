@@ -329,49 +329,22 @@ class PointCloud(object):
         #GL.glPointSize(max(1.0, self.point_size))
     
 
-    # def draw_pointcloud(self) -> None:
-    #     self.set_gl_background()
-    #     stride = 3 * SIZE_OF_FLOAT
-
-    #     # Enable programmable point size
-    #     GL.glEnable(GL.GL_POINT_SMOOTH)
-    #     GL.glEnable(GL.GL_PROGRAM_POINT_SIZE)   # needed on many drivers
-    #     GL.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST)
-
-    #     # Point attenuation parameters
-    #     # Formula: size = base_size / sqrt(a + b*d + c*d^2)
-    #     #GL.glPointSize(1.0)  # base size
-    #     GL.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION,
-    #                         [0.5, 0.0005, 0.00005])   # tweak b,c for effect
-    #     GL.glPointParameterf(GL.GL_POINT_SIZE_MIN, 1.0)
-    #     GL.glPointParameterf(GL.GL_POINT_SIZE_MAX, 20.0)
-
-    #     # Bind position buffer
-    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.position_vbo)
-    #     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-    #     GL.glVertexPointer(3, GL.GL_FLOAT, stride, None)
-
-    #     # Bind color buffer
-    #     if self.color_with_label:
-    #         color_vbo = self.label_vbo
-    #     else:
-    #         color_vbo = self.color_vbo
-    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, color_vbo)
-    #     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-    #     GL.glColorPointer(3, GL.GL_FLOAT, stride, None)
-
-    #     # Draw
-    #     GL.glDrawArrays(GL.GL_POINTS, 0, self.get_no_of_points())
-
-    #     # Cleanup
-    #     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-    #     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
-
-
     def draw_pointcloud(self) -> None:
         self.set_gl_background()
         stride = 3 * SIZE_OF_FLOAT
+
+        # Enable programmable point size
+        GL.glEnable(GL.GL_POINT_SMOOTH)
+        GL.glEnable(GL.GL_PROGRAM_POINT_SIZE)   # needed on many drivers
+        GL.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST)
+
+        # Point attenuation parameters
+        # Formula: size = base_size / sqrt(a + b*d + c*d^2)
+        GL.glPointSize(self.point_size)  # base size
+        GL.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION,
+                            [1.0, 0.0, self.point_size*3])   # tweak b,c for effect
+        GL.glPointParameterf(GL.GL_POINT_SIZE_MIN, 1.0)
+        GL.glPointParameterf(GL.GL_POINT_SIZE_MAX, 20.0)
 
         # Bind position buffer
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.position_vbo)
@@ -386,12 +359,39 @@ class PointCloud(object):
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, color_vbo)
         GL.glEnableClientState(GL.GL_COLOR_ARRAY)
         GL.glColorPointer(3, GL.GL_FLOAT, stride, None)
-        GL.glDrawArrays(GL.GL_POINTS, 0, self.get_no_of_points())  # Draw the points
 
+        # Draw
+        GL.glDrawArrays(GL.GL_POINTS, 0, self.get_no_of_points())
+
+        # Cleanup
         GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
         GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-        # Release the buffer binding
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
+
+    # def draw_pointcloud(self) -> None:
+    #     self.set_gl_background()
+    #     stride = 3 * SIZE_OF_FLOAT
+
+    #     # Bind position buffer
+    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.position_vbo)
+    #     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    #     GL.glVertexPointer(3, GL.GL_FLOAT, stride, None)
+
+    #     # Bind color buffer
+    #     if self.color_with_label:
+    #         color_vbo = self.label_vbo
+    #     else:
+    #         color_vbo = self.color_vbo
+    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, color_vbo)
+    #     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+    #     GL.glColorPointer(3, GL.GL_FLOAT, stride, None)
+    #     GL.glDrawArrays(GL.GL_POINTS, 0, self.get_no_of_points())  # Draw the points
+
+    #     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+    #     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+    #     # Release the buffer binding
+    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
     def reset_perspective(self) -> None:
         self.trans_x, self.trans_y, self.trans_z = self.init_rotation
