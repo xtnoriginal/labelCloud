@@ -232,6 +232,10 @@
         }
     ],
     "last_annotator": "Claudious Nhemwa",
+    "user_history": [
+        "Claudious Nhemw",
+        "Claudious Nhemwa"
+    ],
     "default": 0,
     "type": "object_detection",
     "format": "vertices",

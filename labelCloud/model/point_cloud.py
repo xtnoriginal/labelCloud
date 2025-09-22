@@ -18,6 +18,8 @@ from ..utils.color import colorize_points_with_height
 from ..utils.logger import end_section, green, print_column, red, start_section, yellow
 from . import Perspective
 
+from PyQt5.QtCore import QTimer
+
 # Get size of float (4 bytes) for VBOs
 SIZE_OF_FLOAT = ctypes.sizeof(ctypes.c_float)
 
@@ -340,11 +342,11 @@ class PointCloud(object):
 
         # Point attenuation parameters
         # Formula: size = base_size / sqrt(a + b*d + c*d^2)
-        GL.glPointSize(self.point_size)  # base size
+        GL.glPointSize(max(1.0, self.point_size))  # base size
         GL.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION,
                             [1.0, 0.0, self.point_size*3])   # tweak b,c for effect
         GL.glPointParameterf(GL.GL_POINT_SIZE_MIN, 1.0)
-        GL.glPointParameterf(GL.GL_POINT_SIZE_MAX, 60.0)
+        GL.glPointParameterf(GL.GL_POINT_SIZE_MAX, 100.0)
 
         # Bind position buffer
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.position_vbo)
@@ -447,3 +449,142 @@ class PointCloud(object):
         print_column(
             ["Initial Translation:", str(np.round(self.init_translation, 2))], last=True
         )
+
+
+    def _rotation_matrix(self) -> npt.NDArray[np.float32]:
+        """Return 3x3 rotation matrix from rot_x, rot_y, rot_z in degrees (applied in same order as glRotate calls)."""
+        rx = np.deg2rad(self.rot_x)
+        ry = np.deg2rad(self.rot_y)
+        rz = np.deg2rad(self.rot_z)
+
+        # Rotation matrices about x, y, z (column-major / standard math convention)
+        Rx = np.array([[1, 0, 0],
+                    [0, np.cos(rx), -np.sin(rx)],
+                    [0, np.sin(rx),  np.cos(rx)]], dtype=np.float32)
+
+        Ry = np.array([[ np.cos(ry), 0, np.sin(ry)],
+                    [0, 1, 0],
+                    [-np.sin(ry), 0, np.cos(ry)]], dtype=np.float32)
+
+        Rz = np.array([[np.cos(rz), -np.sin(rz), 0],
+                    [np.sin(rz),  np.cos(rz), 0],
+                    [0, 0, 1]], dtype=np.float32)
+
+        # glRotate calls are applied in sequence rot_x, rot_y, rot_z in your set_gl_background,
+        # which corresponds to R = Rz @ Ry @ Rx if we want the same net rotation depending on convention.
+        # Using Rx then Ry then Rz (row-major math) is equivalent to R = Rz @ Ry @ Rx
+        R = Rz @ Ry @ Rx
+        return R
+
+
+    def _transform_point(self, point: Point3D) -> np.ndarray:
+        """
+        Apply the same sequence of transforms as set_gl_background to a world-space point,
+        returning the transformed point in the model/view space where centering decisions are made.
+        Sequence used:
+        p' = T(trans) * T(pcd_center) * R(rot) * T(-pcd_center) * p
+        Equivalent (computed directly):
+        p_temp = p - pcd_center
+        p_rot  = R @ p_temp
+        p_after = p_rot + pcd_center
+        p_transformed = p_after + trans_vector
+        """
+        p = np.asarray(point, dtype=np.float32)
+        pcd_center = np.add(self.pcd_mins, (np.subtract(self.pcd_maxs, self.pcd_mins) / 2)).astype(np.float32)
+        R = self._rotation_matrix()
+        p_temp = p - pcd_center
+        p_rot = R @ p_temp
+        p_after = p_rot + pcd_center
+        trans_vec = np.array([self.trans_x, self.trans_y, self.trans_z], dtype=np.float32)
+        p_transformed = p_after + trans_vec
+        return p_transformed
+
+
+    def focus_on_point(self, point: Point3D, target_depth: Optional[float] = None, animate: bool = False, duration_ms: int = 400, steps: int = 20) -> None:
+        """
+        Center the view on `point`.
+        - point: (x,y,z) world coordinates
+        - target_depth: if provided, sets the resulting transformed Z to this value (in same space as _transform_point).
+                        If None, preserves current depth (no change in trans_z).
+        - animate: if True, interpolate translation values over `duration_ms`.
+        - duration_ms / steps: control animation timing (if animate True).
+
+        This function adjusts trans_x, trans_y (and trans_z if target_depth provided) so that after set_gl_background()
+        the transformed point will have x=0, y=0 (center of view).
+        """
+        # current transformed coordinates
+        p_trans = self._transform_point(point)
+        # desired transformed x,y (center) is (0,0)
+        delta_x = -p_trans[0]
+        delta_y = -p_trans[1]
+
+        # compute desired new translations
+        new_tx = self.trans_x + delta_x
+        new_ty = self.trans_y + delta_y
+
+        if target_depth is None:
+            new_tz = self.trans_z  # preserve current z
+        else:
+            # set z so transformed z becomes target_depth
+            # current transformed z = p_trans[2] = ... + self.trans_z  => new_trans_z = target_depth - (p_after[2])
+            # compute p_after (before adding trans vector)
+            p = np.asarray(point, dtype=np.float32)
+            pcd_center = np.add(self.pcd_mins, (np.subtract(self.pcd_maxs, self.pcd_mins) / 2)).astype(np.float32)
+            R = self._rotation_matrix()
+            p_after = (R @ (p - pcd_center)) + pcd_center
+            new_tz = target_depth - p_after[2]
+
+        if not animate:
+            self.trans_x = new_tx
+            self.trans_y = new_ty
+            self.trans_z = new_tz
+            try:
+                # assume the GL widget exposes an update method; adapt if your widget uses a different call
+                self._request_repaint()
+            except Exception:
+                # fallback: nothing, GL update should be triggered by caller if needed
+                pass
+            return
+
+        # --- animation path ---
+        # store start and end
+        start = np.array([self.trans_x, self.trans_y, self.trans_z], dtype=np.float32)
+        end = np.array([new_tx, new_ty, new_tz], dtype=np.float32)
+        # number of steps
+        n = max(1, steps)
+        interval = int(max(1, duration_ms // n))
+        step = {"i": 0}
+
+        def _step():
+            i = step["i"]
+            t = (i + 1) / n
+            new_val = start * (1.0 - t) + end * t
+            self.trans_x, self.trans_y, self.trans_z = float(new_val[0]), float(new_val[1]), float(new_val[2])
+            try:
+                self._request_repaint()
+            except Exception:
+                pass
+            step["i"] += 1
+            if step["i"] >= n:
+                timer.stop()
+
+        timer = QTimer()
+        timer.timeout.connect(_step)
+        timer.start(interval)
+
+
+    # Helper used above: call the GL widget update. Provide a small generic hook:
+    def _request_repaint(                                                                                                                                                                                                                                                       elf) -> None:
+        """
+        Small hook: if the PointCloud is owned by a GL widget, set an attribute 'gl_widget' to the widget
+        so we can call its update() (or updateGL) to redraw. If you already call updateGL elsewhere,
+        you can ignore this hook and call pointcloud.focus_on_point(...); parent must call redraw.
+        """
+        if hasattr(self, "gl_widget") and self.gl_widget is not None:
+            # Common names: update(), updateGL(), repaint()
+            if hasattr(self.gl_widget, "update"):
+                self.gl_widget.update()
+            elif hasattr(self.gl_widget, "updateGL"):
+                self.gl_widget.updateGL()
+            elif hasattr(self.gl_widget, "repaint"):
+                self.gl_widget.repaint()

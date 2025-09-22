@@ -15,10 +15,14 @@ from PyQt5.QtWidgets import (
     QScrollArea,
     QSizePolicy,
     QVBoxLayout,
-    QLineEdit
+    QLineEdit,
+    QSpacerItem,
+    QSizePolicy
 )
 
 from ...io.labels.config import LabelConfig
+import webbrowser
+import os
 from ...io.labels.exceptions import (
     DefaultIdMismatchException,
     LabelClassNameEmpty,
@@ -73,7 +77,10 @@ class StartupDialog(QDialog):
         # 3.5 Row: User name input
         self.add_user_row(main_layout)
 
-        # 4. Row: Buttons to save or cancel
+        # 4. Row: Link to open the JSON config file
+        self.add_json_link(main_layout)
+
+        # 5. Row: Buttons to save or cancel
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Save)
         self.buttonBox.accepted.connect(self.save)
         self.buttonBox.rejected.connect(self.reject)
@@ -180,9 +187,10 @@ class StartupDialog(QDialog):
 
         LabelConfig().set_default_class(self.default_label.currentText())
             
-
+        user_name = self.user_name_combo.currentText().strip()
         # Store user name as metadata (extend LabelConfig to support this if not already)
-        LabelConfig().set_user_name(self.user_name_input.text().strip())
+        LabelConfig().set_user_name(user_name=user_name)
+        LabelConfig().add_user_to_history(user_name=user_name)
 
 
 
@@ -240,12 +248,78 @@ class StartupDialog(QDialog):
 
     def add_user_row(self, parent_layout: QVBoxLayout) -> None:
         row = QHBoxLayout()
-        row.addWidget(QLabel("Your Name:"))
+        row.addWidget(QLabel("Annotator:"))
 
-        self.user_name_input = QLineEdit()
-        self.user_name_input.setPlaceholderText("Enter your name")
-        row.addWidget(self.user_name_input, 2)
+        # ComboBox with editable field
+        self.user_name_combo = QComboBox()
+        self.user_name_combo.setEditable(True)
+        self.user_name_combo.setInsertPolicy(QComboBox.InsertAtTop)
 
-        self.user_name_input.setText(LabelConfig().get_user_name())
+        # Load list of previous annotators from LabelConfig (extend LabelConfig to support this)
+        previous_users = LabelConfig().get_all_users()  # returns list[str]
+        current_user = LabelConfig().get_user_name()    # last/current annotator
 
+        # Populate the combo box
+        if previous_users:
+            self.user_name_combo.addItems(previous_users)
+
+        # Set current user as default selection (or first entry if missing)
+        if current_user:
+            index = self.user_name_combo.findText(current_user)
+            if index >= 0:
+                self.user_name_combo.setCurrentIndex(index)
+            else:
+                self.user_name_combo.insertItem(0, current_user)
+                self.user_name_combo.setCurrentIndex(0)
+
+        row.addWidget(self.user_name_combo, 2)
         parent_layout.addLayout(row)
+
+    
+
+    def add_json_link(self, parent_layout: QVBoxLayout) -> None:
+        """
+        Adds a link-like button at the bottom to open the JSON config file.
+        """
+        row = QHBoxLayout()
+
+        
+        self.link_button = QPushButton("Open class config JSON")
+        self.link_button.setFlat(True)  # makes it look like a link
+        self.link_button.setStyleSheet("color: blue; text-decoration: underline; background: none; border: none;")
+        self.link_button.clicked.connect(self._open_class_config_file)
+
+        row.addWidget(self.link_button, alignment=Qt.AlignCenter)  
+        parent_layout.addLayout(row)
+
+    def _open_class_config_file(self):
+        """
+        Opens the JSON file in the system default editor or explorer.
+        """
+
+        from ...control.config_manager import config
+        import sys
+        import subprocess
+        json_path = config.getpath("FILE", "class_definitions") # Assuming LabelConfig can provide this
+        print (json_path)
+        # if os.path.exists(json_path):
+        #     webbrowser.open(f"file://{os.path.abspath(json_path)}")
+        # else:
+        #     QMessageBox.warning(self, "File not found", f"Could not find JSON file:\n{json_path}")
+
+        
+        if not os.path.exists(json_path):
+            QMessageBox.warning(self, "File not found", f"Could not find JSON file:\n{json_path}")
+            return
+
+        try:
+            if sys.platform.startswith("darwin"):  # macOS
+                subprocess.call(("open", json_path))
+            elif os.name == "nt":  # Windows
+                os.startfile(json_path)
+            elif os.name == "posix":  # Linux
+                subprocess.call(("xdg-open", json_path))
+            else:
+                QMessageBox.information(self, "Info", f"JSON file located at:\n{json_path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Could not open file:\n{json_path}\n\n{e}")

@@ -1,39 +1,170 @@
 {
-	"folder": "pointclouds",
+	"folder": "examples",
 	"filename": "exemplary.ply",
-	"path": "pointclouds/exemplary.ply",
+	"path": "labelCloud/resources/examples/exemplary.ply",
+	"annotator": "Claudious Nhemwa",
 	"objects": [
 		{
-			"name": "unassigned",
+			"name": "lfront_foot_tip",
 			"point": [
-				0.18906018,
-				-0.16431077,
-				0.00075082
-			]
+				-0.57276112,
+				-0.00998944,
+				0.46746805
+			],
+			"point_idx": 90283
+		},
+		{
+			"name": "lfront_sesamoid",
+			"point": [
+				-0.55085641,
+				-0.01098136,
+				0.46160859
+			],
+			"point_idx": 83904
 		},
 		{
 			"name": "unassigned",
 			"point": [
-				0.09249982,
-				-0.13109834,
-				0.13237104
-			]
+				0.18031582,
+				0.0955179,
+				-0.65407705
+			],
+			"point_idx": 125267
 		},
 		{
 			"name": "unassigned",
 			"point": [
-				0.08608521,
-				-0.06752718,
-				0.12076201
-			]
+				-0.61180991,
+				-0.07602794,
+				0.48243061
+			],
+			"point_idx": 61583
 		},
 		{
 			"name": "unassigned",
 			"point": [
-				-0.97328329,
-				-0.18338738,
-				-0.00361666
-			]
+				-0.2346215,
+				0.02079493,
+				0.39565533
+			],
+			"point_idx": 88446
+		},
+		{
+			"name": "unassigned",
+			"point": [
+				0.38601208,
+				-0.23131029,
+				-0.5933032
+			],
+			"point_idx": 83273
+		},
+		{
+			"name": "unassigned",
+			"point": [
+				0.46438152,
+				-0.2904714,
+				-1.01699042
+			],
+			"point_idx": 21530
+		},
+		{
+			"name": "unassigned",
+			"point": [
+				0.40701467,
+				-0.1506485,
+				-0.27183414
+			],
+			"point_idx": 125022
+		},
+		{
+			"name": "lfront_foot_back",
+			"point": [
+				0.23689517,
+				-0.23318709,
+				-0.29846472
+			],
+			"point_idx": 119196
+		},
+		{
+			"name": "lfront_foot_tip",
+			"point": [
+				-1.06942511,
+				-0.0160883,
+				0.34661904
+			],
+			"point_idx": 138592
+		},
+		{
+			"name": "rfront_foot_tip",
+			"point": [
+				0.16963419,
+				-0.19213469,
+				-0.24800637
+			],
+			"point_idx": 100825
+		},
+		{
+			"name": "lfront_sesamoid",
+			"point": [
+				0.16493195,
+				-0.18623731,
+				-0.25425804
+			],
+			"point_idx": 100840
+		},
+		{
+			"name": "rfront_sesamoid",
+			"point": [
+				0.15829614,
+				-0.17536414,
+				-0.26603895
+			],
+			"point_idx": 100849
+		},
+		{
+			"name": "lback_foot_tip",
+			"point": [
+				0.12828499,
+				-0.16806673,
+				-0.28387529
+			],
+			"point_idx": 117774
+		},
+		{
+			"name": "rback_foot_tip",
+			"point": [
+				-1.09788978,
+				0.00189533,
+				0.11217079
+			],
+			"point_idx": 128116
+		},
+		{
+			"name": "lback_calcaneous",
+			"point": [
+				0.09153041,
+				-0.1940704,
+				-0.27179548
+			],
+			"point_idx": 118704
+		},
+		{
+			"name": "rback_calcaneous",
+			"point": [
+				-1.14146221,
+				-0.06412597,
+				0.06770915
+			],
+			"point_idx": 156703
+		},
+		{
+			"name": "back_left_foot_back",
+			"point": [
+				0.07207337,
+				-0.20531119,
+				-0.27226961
+			],
+			"point_idx": 131407
 		}
 	]
 }

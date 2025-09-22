@@ -51,6 +51,7 @@ class LabelConfig(object, metaclass=SingletonABCMeta):
         self.type: LabelingMode
         self.format: BaseLabelFormat
         self.user_name: str = "unknown"
+        self.users: List[str] = []
 
         if getattr(self, "_loaded", False) != True:
             self.load_config()
@@ -66,6 +67,7 @@ class LabelConfig(object, metaclass=SingletonABCMeta):
             self.type = LabelingMode(data["type"])
             self.format = data["format"]
             self.user_name = data.get("last_annotator", "unknown")
+            self.users = data.get("user_history", [])
         else:
             self.classes = [ClassConfig("cart", 0, color=Color3f(1, 0, 0))]
             self.default = 0
@@ -79,6 +81,7 @@ class LabelConfig(object, metaclass=SingletonABCMeta):
         data = {
             "classes": [c.to_dict() for c in self.classes],
             "last_annotator": self.user_name,
+            "user_history": self.users,
             "default": self.default,
             "type": self.type.value,
             "format": self.format,
@@ -149,12 +152,20 @@ class LabelConfig(object, metaclass=SingletonABCMeta):
             f"Default class id `{self.default}` is missing in the class list."
         )
     
-    def get_user_name(self):
+    def get_user_name(self) -> str:
         return self.user_name
+    
+
+    def get_all_users(self) -> List[str]:
+        return self.users
 
     # SETTERS
     def set_user_name(self, user_name):
         self.user_name = user_name
+
+    def add_user_to_history(self, user_name):
+        if user_name not in self.users:
+            self.users.append(user_name)
 
     def set_first_as_default(self) -> None:
         self.default = self.classes[0].id

@@ -96,6 +96,31 @@ class GLWidget(QtOpenGL.QGLWidget):
         GLU.gluPerspective(45.0, aspect, GLWidget.NEAR_PLANE, GLWidget.FAR_PLANE)
         GL.glMatrixMode(GL.GL_MODELVIEW)
 
+
+    def draw_origin(self):
+        """Draw XYZ axes at the origin"""
+        GL.glLineWidth(2.0)
+        GL.glBegin(GL.GL_LINES)
+
+        # X axis (red)
+        GL.glColor3f(1.0, 0.0, 0.0)
+        GL.glVertex3f(0.0, 0.0, 0.0)
+        GL.glVertex3f(1.0, 0.0, 0.0)
+
+        # Y axis (green)
+        GL.glColor3f(0.0, 1.0, 0.0)
+        GL.glVertex3f(0.0, 0.0, 0.0)
+        GL.glVertex3f(0.0, 1.0, 0.0)
+
+        # Z axis (blue)
+        GL.glColor3f(0.0, 0.0, 1.0)
+        GL.glVertex3f(0.0, 0.0, 0.0)
+        GL.glVertex3f(0.0, 0.0, 1.0)
+
+        GL.glEnd()
+        GL.glLineWidth(1.0)  # reset
+
+
     def paintGL(self) -> None:
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         GL.glPushMatrix()  # push the current matrix to the current stack
@@ -110,6 +135,9 @@ class GLWidget(QtOpenGL.QGLWidget):
         with ignore_depth_mask():  # Do not write decoration and preview elements in depth buffer
             if config.getboolean("USER_INTERFACE", "show_floor"):
                 oglhelper.draw_xy_plane(self.pcd_manager.pointcloud)  # type: ignore
+            
+            # Draw origin axes here
+            self.draw_origin()
 
             # Draw crosshair/ cursor in 3D world
             if self.crosshair_pos:

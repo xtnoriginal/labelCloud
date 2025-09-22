@@ -180,6 +180,7 @@ class Controller:
             self.selected_side
             and (not self.ctrl_pressed)
             and self.unified_annotation_controller.has_active_item()
+            and isinstance( self.unified_annotation_controller.get_active_item(), BBox)
         ):
             self.view.gl_widget.crosshair_col = Colors.RED.value
             side_vertices = self.unified_annotation_controller.get_active_item().get_vertices()  # type: ignore
@@ -201,7 +202,7 @@ class Controller:
 
         print(self.drawing_mode.drawing_strategy.__class__.__name__)
 
-        if self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_mode.drawing_strategy.pick_flow:
+        if self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" :
             if self.drawing_mode.is_active()and self.ctrl_pressed:
                 self.drawing_mode.register_point(a0.x(), a0.y(), correction=True)
                 print ("Register point in flow mode")
@@ -264,7 +265,9 @@ class Controller:
                 and (not self.align_mode.is_active)
             ):
                 if a0.buttons() & Keys.LeftButton:  # bbox rotation
-                    self.bbox_controller.rotate_with_mouse(-dx, -dy)
+                    item = self.unified_annotation_controller.get_active_item()
+                    if isinstance(item, BBox):
+                        self.bbox_controller.rotate_with_mouse(-dx, -dy)
                 elif a0.buttons() & Keys.RightButton:  # bbox translation
                     new_center = self.view.gl_widget.get_world_coords(
                         a0.x(), a0.y(), correction=True
@@ -292,7 +295,7 @@ class Controller:
             self.side_mode = True
 
         
-        if self.drawing_mode.is_active() and self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_mode.drawing_strategy.pick_flow:
+        if self.drawing_mode.is_active() and self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy":
             self.pcd_manager.zoom_into(a0.angleDelta().y())
             self.scroll_mode = True
         elif (
