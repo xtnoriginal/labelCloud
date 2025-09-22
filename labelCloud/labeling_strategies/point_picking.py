@@ -66,7 +66,7 @@ class PickingPointStrategy(BaseLabelingStrategy):
         if not self.tmp_p1 == None :
             k, idx, dist= self.pcd_tree.search_knn_vector_3d(self.tmp_p1,1);
             if idx:
-                ogl.draw_points([self.view.controller.pcd_manager.pointcloud.points[idx[0]]], color=self.preview_color, point_size=config.getint("POINTCLOUD", "POINT_SIZE")*2)
+                ogl.draw_points([self.view.controller.pcd_manager.pointcloud.points[idx[0]]], color=self.preview_color, point_size=config.getint("POINTCLOUD", "POINT_SIZE")*3)
                                                 
     def get_point(self) -> Point3D: 
         assert self.point_1 is not None

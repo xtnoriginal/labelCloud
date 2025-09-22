@@ -1801,6 +1801,7 @@
     <addaction name="act_show_floor"/>
     <addaction name="act_show_orientation"/>
     <addaction name="act_save_perspective"/>
+    <addaction name="act_show_scaled"/>
     <addaction name="act_align_pcd"/>
     <addaction name="act_color_with_label"/>
     <addaction name="act_change_settings"/>
@@ -1880,6 +1881,17 @@
    <property name="toolTip">
     <string>Shows a grid along the x-y-plane (z=0).</string>
    </property>
+  </action>
+   <action name="act_show_scaled">
+    <property name="checkable">
+      <bool>true</bool>
+    </property>
+    <property name="checked">
+      <bool>true</bool>
+    </property>
+    <property name="text">
+      <string>Show Scaled</string>
+    </property>
   </action>
   <action name="act_show_orientation">
    <property name="checkable">

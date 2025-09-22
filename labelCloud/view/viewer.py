@@ -125,8 +125,16 @@ class GLWidget(QtOpenGL.QGLWidget):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
         GL.glPushMatrix()  # push the current matrix to the current stack
 
-        # Draw point cloud
-        self.pcd_manager.pointcloud.draw_pointcloud()  # type: ignore
+
+
+        if config.getboolean("USER_INTERFACE", "scaled_point_size"):
+            print("Using scaled point size")
+            # Draw point cloud
+            self.pcd_manager.pointcloud.draw_pointcloud()  # type: ignore
+        else:
+            print("Using normal point size")
+            # Draw point cloud
+            self.pcd_manager.pointcloud.draw_pointcloud_()  # type: ignore
 
         # Get actual matrices for click unprojection
         self.modelview = GL.glGetDoublev(GL.GL_MODELVIEW_MATRIX)

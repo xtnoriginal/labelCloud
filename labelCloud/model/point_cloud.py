@@ -328,7 +328,7 @@ class PointCloud(object):
 
         GL.glTranslate(*(pcd_center * -1))  # move point cloud to center for rotation
 
-        #GL.glPointSize(max(1.0, self.point_size))
+        GL.glPointSize(max(1.0, self.point_size))
     
 
     def draw_pointcloud(self) -> None:
@@ -371,29 +371,36 @@ class PointCloud(object):
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
 
-    # def draw_pointcloud(self) -> None:
-    #     self.set_gl_background()
-    #     stride = 3 * SIZE_OF_FLOAT
+    def draw_pointcloud_(self) -> None:
 
-    #     # Bind position buffer
-    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.position_vbo)
-    #     GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-    #     GL.glVertexPointer(3, GL.GL_FLOAT, stride, None)
+        self.set_gl_background()
+        stride = 3 * SIZE_OF_FLOAT
 
-    #     # Bind color buffer
-    #     if self.color_with_label:
-    #         color_vbo = self.label_vbo
-    #     else:
-    #         color_vbo = self.color_vbo
-    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, color_vbo)
-    #     GL.glEnableClientState(GL.GL_COLOR_ARRAY)
-    #     GL.glColorPointer(3, GL.GL_FLOAT, stride, None)
-    #     GL.glDrawArrays(GL.GL_POINTS, 0, self.get_no_of_points())  # Draw the points
+        # Bind position buffer
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.position_vbo)
+        GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+        GL.glVertexPointer(3, GL.GL_FLOAT, stride, None)
 
-    #     GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-    #     GL.glDisableClientState(GL.GL_COLOR_ARRAY)
-    #     # Release the buffer binding
-    #     GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+         # Reset point state to fixed mode
+        GL.glDisable(GL.GL_POINT_SMOOTH)
+        GL.glDisable(GL.GL_PROGRAM_POINT_SIZE)
+        GL.glPointSize(self.point_size)  # fixed size
+        GL.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, [1.0, 0.0, 0.0])
+
+        # Bind color buffer
+        if self.color_with_label:
+            color_vbo = self.label_vbo
+        else:
+            color_vbo = self.color_vbo
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, color_vbo)
+        GL.glEnableClientState(GL.GL_COLOR_ARRAY)
+        GL.glColorPointer(3, GL.GL_FLOAT, stride, None)
+        GL.glDrawArrays(GL.GL_POINTS, 0, self.get_no_of_points())  # Draw the points
+
+        GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
+        GL.glDisableClientState(GL.GL_COLOR_ARRAY)
+        # Release the buffer binding
+        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
 
     def reset_perspective(self) -> None:
         self.trans_x, self.trans_y, self.trans_z = self.init_rotation

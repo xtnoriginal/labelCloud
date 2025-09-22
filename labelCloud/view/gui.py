@@ -77,6 +77,12 @@ def set_keep_perspective(state: bool) -> None:
 def set_propagate_labels(state: bool) -> None:
     config.set("LABEL", "propagate_labels", str(state))
 
+def set_propagate_labels(state: bool) -> None:
+    config.set("LABEL", "propagate_labels", str(state))
+
+def set_scaled_point_size(state: bool) -> None:
+    print("set_scaled_point_size called with:", state)
+    config.set("USER_INTERFACE", "scaled_point_size", str(state))
 
 # CSS file paths need to be set dynamically
 STYLESHEET = """
@@ -146,6 +152,7 @@ class GUI(QtWidgets.QMainWindow):
         self.act_save_perspective: QtWidgets.QAction
         self.act_align_pcd: QtWidgets.QAction
         self.act_change_settings: QtWidgets.QAction
+        self.act_show_scaled: QtWidgets.QAction
 
         # STATUS BAR
         self.status_bar: QtWidgets.QStatusBar
@@ -418,6 +425,7 @@ class GUI(QtWidgets.QMainWindow):
         self.act_save_perspective.toggled.connect(set_keep_perspective)
         self.act_align_pcd.toggled.connect(self.controller.align_mode.change_activation)
         self.act_change_settings.triggered.connect(self.show_settings_dialog)
+        self.act_show_scaled.toggled.connect(set_scaled_point_size)
 
         #slider for point size
         self.point_size_slider.valueChanged.connect(self.update_point_size)
@@ -449,6 +457,9 @@ class GUI(QtWidgets.QMainWindow):
         )
         self.act_color_with_label.setChecked(
             config.getboolean("POINTCLOUD", "color_with_label")
+        )
+        self.act_show_scaled.setChecked(
+            config.getboolean("USER_INTERFACE", "scaled_point_size")
         )
 
     # Collect, filter and forward events to viewer
