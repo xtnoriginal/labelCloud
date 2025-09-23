@@ -207,12 +207,9 @@ class Controller:
         """Triggers actions when the user clicks the mouse."""
         self.last_cursor_pos = a0.pos()
 
-        print(self.drawing_mode.drawing_strategy.__class__.__name__)
-
         if self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" :
             if self.drawing_mode.is_active()and self.ctrl_pressed:
                 self.drawing_mode.register_point(a0.x(), a0.y(), correction=True)
-                print ("Register point in flow mode")
         
         elif (
             self.drawing_mode.is_active()

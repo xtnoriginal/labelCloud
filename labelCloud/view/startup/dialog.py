@@ -301,13 +301,8 @@ class StartupDialog(QDialog):
         import sys
         import subprocess
         json_path = config.getpath("FILE", "class_definitions") # Assuming LabelConfig can provide this
-        print (json_path)
-        # if os.path.exists(json_path):
-        #     webbrowser.open(f"file://{os.path.abspath(json_path)}")
-        # else:
-        #     QMessageBox.warning(self, "File not found", f"Could not find JSON file:\n{json_path}")
 
-        
+
         if not os.path.exists(json_path):
             QMessageBox.warning(self, "File not found", f"Could not find JSON file:\n{json_path}")
             return
