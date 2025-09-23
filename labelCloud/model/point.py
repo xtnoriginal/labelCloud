@@ -77,7 +77,7 @@ class Point(object):
         point_color = LabelConfig().get_class_color(self.classname)
         if highlighted:
             point_color = self.HIGHLIGHTED_COLOR
-        oglhelper.draw_points([self.point], color=Color3f.to_rgba(point_color), point_size=config.getint("POINTCLOUD", "POINT_SIZE")*2.5)
+        oglhelper.draw_points([self.point], color=Color3f.to_rgba(point_color), point_size=min(config.getint("POINTCLOUD", "POINT_SIZE")*2.5, 20))
         GL.glPopMatrix()
         
 
