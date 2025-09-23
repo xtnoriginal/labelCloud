@@ -44,7 +44,6 @@ class PickingPointStrategy(BaseLabelingStrategy):
             self.view.set_label_flow_status(self.view.current_class_dropdown.itemText(2))
 
     def register_point(self, new_point: Point3D) -> None:
-        print("register_point called with:", new_point)
         if not self.tmp_p1 == None :
             k, idx, dist= self.pcd_tree.search_knn_vector_3d(new_point,1);
             if idx:
