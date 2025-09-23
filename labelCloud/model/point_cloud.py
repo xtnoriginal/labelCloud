@@ -581,7 +581,7 @@ class PointCloud(object):
 
 
     # Helper used above: call the GL widget update. Provide a small generic hook:
-    def _request_repaint(                                                                                                                                                                                                                                                       elf) -> None:
+    def _request_repaint(self) -> None:
         """
         Small hook: if the PointCloud is owned by a GL widget, set an attribute 'gl_widget' to the widget
         so we can call its update() (or updateGL) to redraw. If you already call updateGL elsewhere,

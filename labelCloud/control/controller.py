@@ -21,6 +21,7 @@ from .unified_annotation_controller import UnifiedAnnotationController
 
 
 from ..model.bbox import BBox
+from ..model.point import Point
 
 from ..definitions import Mode
 
@@ -141,6 +142,12 @@ class Controller:
             self.unified_annotation_controller.set_active_item(index)
 
             self.update_all()
+            
+
+            item = self.unified_annotation_controller.get_active_item()
+
+            if isinstance(item, Point):
+                self.pcd_manager.pointcloud.focus_on_point(item.point)  # type: ignoreq
         
             self.view.status_manager.update_status(
                 f"Selected: {self.unified_annotation_controller.get_active_item().get_classname()}",

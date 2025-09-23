@@ -18,18 +18,40 @@ DEVICE_PIXEL_RATIO: Optional[float] = (
     None  # is set once and for every window resize (retina display fix)
 )
 
-
 def draw_points(
     points: Union[List[Point3D], npt.NDArray],
     color: Color4f = (0, 1, 1, 1),
     point_size: int = 10,
 ) -> None:
-    GL.glColor4d(*color)
+    # Save current OpenGL state
+    GL.glPushAttrib(GL.GL_POINT_BIT | GL.GL_CURRENT_BIT)
+
+    # Force fixed-size points (disable scaling with distance)
+    GL.glDisable(GL.GL_PROGRAM_POINT_SIZE)
+    GL.glDisable(GL.GL_POINT_SMOOTH)  # optional
     GL.glPointSize(max(1.0, point_size))
+    GL.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, [1.0, 0.0, 0.0])
+
+    # Set color and draw
+    GL.glColor4d(*color)
     GL.glBegin(GL.GL_POINTS)
     for point in points:
         GL.glVertex3d(*point)
     GL.glEnd()
+
+    # Restore previous state
+    GL.glPopAttrib()
+# def draw_points(
+#     points: Union[List[Point3D], npt.NDArray],
+#     color: Color4f = (0, 1, 1, 1),
+#     point_size: int = 10,
+# ) -> None:
+#     GL.glColor4d(*color)
+#     GL.glPointSize(max(1.0, point_size))
+#     GL.glBegin(GL.GL_POINTS)
+#     for point in points:
+#         GL.glVertex3d(*point)
+#     GL.glEnd()
 
 
 def draw_lines(
