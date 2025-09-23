@@ -101,11 +101,13 @@ class StartupDialog(QDialog):
 
          - the selected mode influences the available label export formats
         """
-        parent_layout.addWidget(QLabel("Select labeling mode:"))
+
+        # Commented out label and  buttons as to meke the user stick to the same label
+        #parent_layout.addWidget(QLabel("Select labeling mode:"))
 
         self.select_labeling_mode = SelectLabelingMode()
         self.select_labeling_mode.changed.connect(self._update_label_formats)
-        parent_layout.addWidget(self.select_labeling_mode)
+        #parent_layout.addWidget(self.select_labeling_mode)
 
     def _update_label_formats(self) -> None:
         self.label_export_format.clear()
@@ -130,10 +132,12 @@ class StartupDialog(QDialog):
 
         row.addSpacing(100)
 
-        row.addWidget(QLabel("Label export format:"))
+       
 
         self.label_export_format = QComboBox()
         if self.mode == "startup":
+            row.addWidget(QLabel("Label export format:"))
+
             self._update_label_formats()
             self.label_export_format.setCurrentText(LabelConfig().format)
             row.addWidget(self.label_export_format, 2)

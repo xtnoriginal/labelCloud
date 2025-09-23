@@ -72,7 +72,7 @@ class LabelConfig(object, metaclass=SingletonABCMeta):
             self.classes = [ClassConfig("cart", 0, color=Color3f(1, 0, 0))]
             self.default = 0
             self.type = LabelingMode.OBJECT_DETECTION
-            self.format = ObjectDetectionFormat.CENTROID_REL
+            self.format = ObjectDetectionFormat.VERTICES
         self.validate()
         self._loaded = True
 

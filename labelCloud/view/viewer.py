@@ -128,11 +128,9 @@ class GLWidget(QtOpenGL.QGLWidget):
 
 
         if config.getboolean("USER_INTERFACE", "scaled_point_size"):
-            print("Using scaled point size")
             # Draw point cloud
             self.pcd_manager.pointcloud.draw_pointcloud()  # type: ignore
         else:
-            print("Using normal point size")
             # Draw point cloud
             self.pcd_manager.pointcloud.draw_pointcloud_()  # type: ignore
 
