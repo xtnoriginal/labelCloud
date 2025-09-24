@@ -229,6 +229,11 @@
             "name": "middle_back",
             "id": 45,
             "color": "#ffd77f"
+        },
+        {
+            "name": "Step back",
+            "id": 46,
+            "color": "#2700ff"
         }
     ],
     "last_annotator": "Claudious Nhemwa",
