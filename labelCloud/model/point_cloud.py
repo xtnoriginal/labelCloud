@@ -346,7 +346,7 @@ class PointCloud(object):
         GL.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION,
                             [1.0, 0.0, self.point_size*3])   # tweak b,c for effect
         GL.glPointParameterf(GL.GL_POINT_SIZE_MIN, 1.0)
-        GL.glPointParameterf(GL.GL_POINT_SIZE_MAX, 100.0)
+        GL.glPointParameterf(GL.GL_POINT_SIZE_MAX, 200.0)
 
         # Bind position buffer
         GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.position_vbo)
