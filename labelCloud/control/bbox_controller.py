@@ -5,6 +5,10 @@ Bounding Box Management: adding, selecting updating, deleting bboxes;
 Possible Active Bounding Box Manipulations: rotation, translation, scaling
 """
 
+
+#Some functions were moved to unified_annotation_controller.py
+# and some functions are no more needed here. Left them just in case. 
+
 import logging
 from functools import wraps
 from typing import TYPE_CHECKING, List, Optional
@@ -135,6 +139,7 @@ class BoundingBoxController(object):
     # MANIPULATORS
     @has_active_bbox_decorator
     def update_position(self, axis: str, value: float) -> None:
+        #Exampe instead of doing it internaly, we now do it via unified_annotation_controller
         if axis == "pos_x":
             self.unified_annotation_controller.get_active_item().set_x_translation(value)  # type: ignore
         elif axis == "pos_y":

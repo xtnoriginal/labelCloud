@@ -39,7 +39,7 @@ def has_active_point_decorator(func):
 
     return wrapper
 
-
+# Logic for pick point controller is very similar to pick flow controller so I just copied the code and modified it a bit
 class PickPointController(object):
     """
     Controller for managing picked points in the 3D point cloud.
@@ -49,9 +49,9 @@ class PickPointController(object):
     def __init__(self) -> None:
         self.view : GUI
         self.pcd_manager : PointCloudManger
-        self.points :  List[Point] = []
+        self.points :  List[Point] = [] # This to be removed in refactor.
         self.active_point_id = -1
-        self.unified_annotation_controller: UnifiedAnnotationController
+        self.unified_annotation_controller: UnifiedAnnotationController # Then new controlller we no more need to store the data
     
     def has_active_point(self) -> bool:
         return 0 <= self.active_point_id < len(self.points)

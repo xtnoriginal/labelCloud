@@ -18,6 +18,8 @@ DEVICE_PIXEL_RATIO: Optional[float] = (
     None  # is set once and for every window resize (retina display fix)
 )
 
+# new draw method for points removes scaling with distance and draws the points.
+# maybe playing with glPointParameter might help here too.
 def draw_points(
     points: Union[List[Point3D], npt.NDArray],
     color: Color4f = (0, 1, 1, 1),

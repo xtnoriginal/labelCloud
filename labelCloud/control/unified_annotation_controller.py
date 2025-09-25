@@ -2,6 +2,11 @@ from ..model import Point, BBox
 from typing import List, Union
 from PyQt5 import QtWidgets
 
+
+'''
+Controller for managing both bounding boxes and points in a unified manner. Similar logic to whatwas in bbox_controller.py and point_controller.py
+Most logic to be moved here.
+'''
 class UnifiedAnnotationController:
     def __init__(self):
         self.items = []  # Can hold both BBox and Point objects
@@ -69,7 +74,7 @@ class UnifiedAnnotationController:
         
         for item in self.items:
             list_item = QtWidgets.QListWidgetItem(item.get_classname())
-    
+            #This was added to change icons for bbox  and point
             # Set icon based on type
             if isinstance(item, BBox):
                 list_item.setIcon(self.view.icon_bbox)  # cube icon

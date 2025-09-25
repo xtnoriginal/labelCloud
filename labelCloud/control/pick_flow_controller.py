@@ -5,6 +5,9 @@ settings in one place.
 Point Management: adding, selecting updating, deleting points;
 """
 
+
+# Logic for pick flow controller is very similar to pick point controller so I just copied the code and modified it a bit
+
 import logging
 from functools import wraps
 from typing import TYPE_CHECKING, List, Optional

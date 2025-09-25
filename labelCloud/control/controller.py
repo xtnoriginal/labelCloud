@@ -32,7 +32,7 @@ class Controller:
         """Initializes all controllers and managers."""
         self.view: "GUI"
         self.pcd_manager = PointCloudManger()
-        self.unified_annotation_controller = UnifiedAnnotationController()
+        self.unified_annotation_controller = UnifiedAnnotationController() # Added unified controller to manage both bbox and points
         self.bbox_controller = BoundingBoxController()
         self.pick_point_controller = PickPointController()
         self.pick_flow_controller = PickFlowController()
@@ -270,7 +270,7 @@ class Controller:
             ):
                 if a0.buttons() & Keys.LeftButton:  # bbox rotation
                     item = self.unified_annotation_controller.get_active_item()
-                    if isinstance(item, BBox):
+                    if isinstance(item, BBox): # The code might crush because item can be a BBox or Point some logic is needed: solution just add this line
                         self.bbox_controller.rotate_with_mouse(-dx, -dy)
                 elif a0.buttons() & Keys.RightButton:  # bbox translation
                     new_center = self.view.gl_widget.get_world_coords(
@@ -482,7 +482,7 @@ class Controller:
     def crop_pointcloud_inside_active_bbox(self) -> None:
         item = self.unified_annotation_controller.get_active_item()
 
-        if not isinstance(item, BBox):
+        if not isinstance(item, BBox): # Logic not necessary for points
             
             return 
         
@@ -568,7 +568,7 @@ class Controller:
         if controller:
             controller.translate_along_z(down=down)
 
-    def skip_label(self):
+    def skip_label(self): # Used when in pick flow mode to move to next class after picking a point
         #Check if in pick flow mode
         if self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_mode.drawing_strategy.pick_flow:
             self.drawing_mode.move_to_next_class()

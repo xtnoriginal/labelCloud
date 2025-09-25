@@ -11,6 +11,15 @@ from ..utils import math3d as math3d
 from ..utils import oglhelper as ogl
 import open3d as o3d
 
+'''Point picking strategy for placing single points in the point cloud.
+This strategy allows users to pick a point in the point cloud, which is then stored as a Point object.
+It supports previewing the point location before finalizing the selection.
+
+We use a KDTree to efficiently find the nearest point in the point cloud to the picked location. This is used for pick point and pickflow.
+
+
+Created with spanning.py and picking.py as references.
+'''
 
 class PickingPointStrategy(BaseLabelingStrategy):
     POINTS_NEEDED = 1

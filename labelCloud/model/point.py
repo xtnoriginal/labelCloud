@@ -18,7 +18,8 @@ from ..definitions import (
 from ..io.labels.config import LabelConfig
 from ..utils import math3d, oglhelper
 
-
+# Added point class which stored the point id and point coordinates. Once confused my self with Point3D type alias
+# Point3D = npt.NDArray[np.float32]  # (x,y,z)
 class Point(object):
     MIN_DIMENSION: float = config.getfloat("LABEL", "MIN_BOUNDINGBOX_DIMENSION")
     HIGHLIGHTED_COLOR: Color3f = Color3f(0, 1, 0)
@@ -77,6 +78,7 @@ class Point(object):
         point_color = LabelConfig().get_class_color(self.classname)
         if highlighted:
             point_color = self.HIGHLIGHTED_COLOR
+        # Import for adjustemnt of point size.
         oglhelper.draw_points([self.point], color=Color3f.to_rgba(point_color), point_size=min(config.getfloat("POINTCLOUD", "POINT_SIZE")*2.5, 20))
         GL.glPopMatrix()
         

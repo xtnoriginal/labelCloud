@@ -10,7 +10,7 @@ from .config_manager import config
 
 def get_label_strategy(export_format: str, label_folder: Path) -> "BaseLabelFormat":
     if export_format == "vertices":
-        return VerticesFormat(label_folder, LabelManager.EXPORT_PRECISION)
+        return VerticesFormat(label_folder, LabelManager.EXPORT_PRECISION)  # We using this label format only
     elif export_format == "centroid_rel":
         return CentroidFormat(
             label_folder, LabelManager.EXPORT_PRECISION, relative_rotation=True

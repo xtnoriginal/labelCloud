@@ -56,7 +56,7 @@ class DrawingManager(object):
             self.drawing_strategy.register_point(world_point)
             
             # If the strategy is a point picking strategy, we add the point to the pick point controller
-            if self.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_strategy.pick_flow:
+            if self.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_strategy.pick_flow: # Checking if we in pick point or pick flow 
                 self.pick_point_controller.add_point(self.drawing_strategy.get_point())
                 self.move_to_next_class()
      
@@ -83,7 +83,7 @@ class DrawingManager(object):
                 self.drawing_strategy = None
                 
     
-    def undo(self):
+    def undo(self): # called when user pressess ctrl+z
         
         if self.index > 1:
             self.index -= 1
@@ -92,7 +92,7 @@ class DrawingManager(object):
             
 
 
-    def move_to_next_class(self):
+    def move_to_next_class(self): # Move  to next class in pick flow mode
         # only move if valid index
 
         next_index = self.index + 1
