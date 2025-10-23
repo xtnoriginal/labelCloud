@@ -1,7 +1,7 @@
 {
-	"folder": "examples",
+	"folder": "pointclouds",
 	"filename": "exemplary.ply",
-	"path": "labelCloud/resources/examples/exemplary.ply",
+	"path": "pointclouds/exemplary.ply",
 	"annotator": "Claudious Nhemwa",
 	"objects": [
 		{
