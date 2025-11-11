@@ -571,4 +571,4 @@ class Controller:
     def skip_label(self): # Used when in pick flow mode to move to next class after picking a point
         #Check if in pick flow mode
         if self.drawing_mode.drawing_strategy.__class__.__name__== "PickingPointStrategy" and self.drawing_mode.drawing_strategy.pick_flow:
-            self.drawing_mode.move_to_next_class()
+            self.drawing_mode.move_to_next_class(skip=True)
