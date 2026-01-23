@@ -529,17 +529,23 @@ class PointCloud(object):
         new_tx = self.trans_x + delta_x
         new_ty = self.trans_y + delta_y
 
+
+        scene_diag = np.linalg.norm(self.pcd_maxs - self.pcd_mins)
+        target_depth = -scene_diag * 1.2
+
         if target_depth is None:
-            new_tz = self.trans_z  # preserve current z
-        else:
-            # set z so transformed z becomes target_depth
-            # current transformed z = p_trans[2] = ... + self.trans_z  => new_trans_z = target_depth - (p_after[2])
-            # compute p_after (before adding trans vector)
-            p = np.asarray(point, dtype=np.float32)
-            pcd_center = np.add(self.pcd_mins, (np.subtract(self.pcd_maxs, self.pcd_mins) / 2)).astype(np.float32)
-            R = self._rotation_matrix()
-            p_after = (R @ (p - pcd_center)) + pcd_center
-            new_tz = target_depth - p_after[2]
+            scene_diag = np.linalg.norm(self.pcd_maxs - self.pcd_mins)
+            target_depth = -scene_diag * 1.2
+       
+        # set z so transformed z becomes target_depth
+        # current transformed z = p_trans[2] = ... + self.trans_z  => new_trans_z = target_depth - (p_after[2])
+        # compute p_after (before adding trans vector)
+        p = np.asarray(point, dtype=np.float32)
+        pcd_center = np.add(self.pcd_mins, (np.subtract(self.pcd_maxs, self.pcd_mins) / 2)).astype(np.float32)
+        R = self._rotation_matrix()
+        p_after = (R @ (p - pcd_center)) + pcd_center
+        new_tz = target_depth - p_after[2]
+
 
         if not animate:
             self.trans_x = new_tx
