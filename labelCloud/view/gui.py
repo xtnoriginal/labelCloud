@@ -680,6 +680,8 @@ class GUI(QtWidgets.QMainWindow):
             self.controller.pcd_manager.pcd_folder = path_to_folder
             self.controller.pcd_manager.read_pointcloud_folder()
             self.controller.pcd_manager.get_next_pcd()
+            self.controller.unified_annotation_controller.set_items(self.controller.pcd_manager.get_labels_from_file())
+            self.controller.unified_annotation_controller.set_active_item(0)
             logging.info("Changed point cloud folder to %s!" % path_to_folder)
 
     def change_label_folder(self) -> None:

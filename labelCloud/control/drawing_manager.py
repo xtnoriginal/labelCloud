@@ -95,14 +95,13 @@ class DrawingManager(object):
     def move_to_next_class(self, skip: bool = False): # Move  to next class in pick flow mode
         # only move if valid index
 
-        next_index = self.index + 1
+    
         self.index += 1
-        
-        if next_index < self.view.current_class_dropdown.count():
+        if self.index < self.view.current_class_dropdown.count():
             # set next class
 
             #If skip do not change the label
-            if skip:
+            if not skip:
                 self.view.current_class_dropdown.setCurrentIndex(self.index)
 
             self.view.gl_widget.set_current_label(self.view.current_class_dropdown.itemText(self.index))

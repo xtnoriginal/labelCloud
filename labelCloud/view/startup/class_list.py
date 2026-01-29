@@ -12,6 +12,8 @@ from PyQt5.QtWidgets import (
     QSpinBox,
     QVBoxLayout,
     QWidget,
+    QGroupBox,
+    QCheckBox,
 )
 
 from ...io.labels.config import ClassConfig, LabelConfig
@@ -35,9 +37,13 @@ class ClassList(QWidget):
 
         self.delete_buttons.buttonClicked.connect(self._delete_label)
 
+        self.session_buttons = QButtonGroup()
+        # Connect to a function to handle changes
+        self.session_buttons.buttonClicked.connect(self.on_state_changed)
+
         for class_label in LabelConfig().classes:
             self.add_label(
-                class_label.id, class_label.name, rgb_to_hex(class_label.color)
+                class_label.id, class_label.name, rgb_to_hex(class_label.color), False
             )
 
     @property
@@ -52,6 +58,15 @@ class ClassList(QWidget):
             max_class_id = max(max_class_id, label_id)
         return max_class_id + 1
 
+
+    def on_state_changed(self, state):
+        print("Session state changed:", state)
+        # if self.session_button.isChecked():
+        #     print("Session Enabled")
+        # else:
+        #     print("Session Disabled")
+        self.changed.emit()
+
     def _get_next_distinct_color(self) -> str:
         if not self.colors:
             self.colors = get_distinct_colors(25)
@@ -63,6 +78,7 @@ class ClassList(QWidget):
         id: Optional[int] = None,
         name: Optional[str] = None,
         hex_color: Optional[str] = None,
+        session: Optional[bool] = True,
     ) -> None:
         if id is None:
             id = self.next_label_id
@@ -103,6 +119,11 @@ class ClassList(QWidget):
         self.delete_buttons.addButton(label_delete)
         row_label.addWidget(label_delete)
 
+        session_button = QCheckBox()
+        self.session_buttons.addButton(session_button)
+        session_button.setChecked(session)
+        row_label.addWidget(session_button)
+        
         self.class_labels.insertLayout(self.nb_of_labels, row_label)
 
         self.changed.emit()
