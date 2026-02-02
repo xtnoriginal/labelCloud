@@ -173,6 +173,18 @@ class StartupDialog(QDialog):
             alignment=Qt.AlignRight
             )
 
+        # ✅ Column headers
+        header = QHBoxLayout()
+        header.setSpacing(15)
+
+        header.addWidget(QLabel("ID"))
+        header.addWidget(QLabel("Name"), stretch=2)
+        header.addWidget(QLabel("Color"))
+        header.addWidget(QLabel(""))  # delete column spacer
+        header.addWidget(QLabel("Select"))
+
+        parent_layout.addLayout(header)
+
     
 
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
