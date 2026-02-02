@@ -17,7 +17,8 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QLineEdit,
     QSpacerItem,
-    QSizePolicy
+    QSizePolicy,
+    QCheckBox
 )
 
 from ...io.labels.config import LabelConfig
@@ -166,6 +167,13 @@ class StartupDialog(QDialog):
         self.label_list.changed.connect(self._on_class_list_changed)
 
         parent_layout.addWidget(QLabel("Change class labels:"))
+
+        parent_layout.addWidget(
+            self.label_list.select_all_sessions,
+            alignment=Qt.AlignRight
+            )
+
+    
 
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll_area.setWidgetResizable(True)

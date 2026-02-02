@@ -2,7 +2,7 @@ import random
 from typing import List, Optional
 
 import pkg_resources
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (
     QButtonGroup,
@@ -12,9 +12,10 @@ from PyQt5.QtWidgets import (
     QSpinBox,
     QVBoxLayout,
     QWidget,
-    QGroupBox,
     QCheckBox,
+    QAbstractButton
 )
+
 
 from ...io.labels.config import ClassConfig, LabelConfig
 from ...utils.color import get_distinct_colors, hex_to_rgb, rgb_to_hex
@@ -32,18 +33,20 @@ class ClassList(QWidget):
         self.class_labels = QVBoxLayout()
         self.class_labels.addStretch()
 
+
         self.setLayout(self.class_labels)
         self.delete_buttons = QButtonGroup()
 
         self.delete_buttons.buttonClicked.connect(self._delete_label)
 
         self.session_buttons = QButtonGroup()
+        self.session_buttons.setExclusive(False)
         # Connect to a function to handle changes
         self.session_buttons.buttonClicked.connect(self.on_state_changed)
 
         for class_label in LabelConfig().classes:
             self.add_label(
-                class_label.id, class_label.name, rgb_to_hex(class_label.color), False
+                class_label.id, class_label.name, rgb_to_hex(class_label.color),  class_label.session
             )
 
     @property
@@ -59,12 +62,9 @@ class ClassList(QWidget):
         return max_class_id + 1
 
 
-    def on_state_changed(self, state):
-        print("Session state changed:", state)
-        # if self.session_button.isChecked():
-        #     print("Session Enabled")
-        # else:
-        #     print("Session Disabled")
+    def on_state_changed(self, button: QAbstractButton):
+        row_index = self._get_row_index_from_button(button)
+        print(f"Session state changed at row {row_index}")
         self.changed.emit()
 
     def _get_next_distinct_color(self) -> str:
@@ -123,7 +123,12 @@ class ClassList(QWidget):
         self.session_buttons.addButton(session_button)
         session_button.setChecked(session)
         row_label.addWidget(session_button)
-        
+
+        # ✅ Select-all checkbox
+        self.select_all_sessions = QCheckBox("Select all")
+        self.select_all_sessions.setTristate(True)
+        self.select_all_sessions.stateChanged.connect(self.on_select_all_changed)
+
         self.class_labels.insertLayout(self.nb_of_labels, row_label)
 
         self.changed.emit()
@@ -148,8 +153,9 @@ class ClassList(QWidget):
         class_id = int(row.itemAt(0).widget().text())  # type: ignore
         class_name = row.itemAt(1).widget().text()  # type: ignore
         class_color = hex_to_rgb(row.itemAt(2).widget().color())  # type: ignore
-
-        return ClassConfig(id=class_id, name=class_name, color=class_color)
+        class_session = row.itemAt(4).widget().isChecked()  # type: ignore
+       
+        return ClassConfig(id=class_id, name=class_name, color=class_color,session=class_session)
 
     def get_class_configs(self) -> List[ClassConfig]:
         classes = []
@@ -158,3 +164,55 @@ class ClassList(QWidget):
             classes.append(self._get_class_config(i))
 
         return classes
+    
+
+    def _get_row_index_from_button(self, button: QAbstractButton) -> int:
+        for i in range(self.nb_of_labels):
+            row = self.class_labels.itemAt(i)
+            if row is None:
+                continue
+
+            # session checkbox is the LAST widget you added
+            if row.itemAt(row.count() - 1).widget() is button:
+                return i
+
+        return -1
+
+
+
+    def _update_select_all_state(self):
+        buttons = self.session_buttons.buttons()
+        if not buttons:
+            self.select_all_sessions.setCheckState(Qt.Unchecked)
+            return
+
+        checked_count = sum(b.isChecked() for b in buttons)
+
+        self.select_all_sessions.blockSignals(True)
+        if checked_count == len(buttons):
+            self.select_all_sessions.setCheckState(Qt.Checked)
+        elif checked_count == 0:
+            self.select_all_sessions.setCheckState(Qt.Unchecked)
+        else:
+            self.select_all_sessions.setCheckState(Qt.PartiallyChecked)
+        self.select_all_sessions.blockSignals(False)
+
+    def on_state_changed(self, button: QAbstractButton):
+        row_index = self._get_row_index_from_button(button)
+        print(f"Session state changed at row {row_index}")
+
+        self._update_select_all_state()
+        self.changed.emit()
+    
+
+    def on_select_all_changed(self, state: int):
+        if state == Qt.PartiallyChecked:
+            return
+
+        check = state == Qt.Checked
+        self.session_buttons.blockSignals(True)
+        for button in self.session_buttons.buttons():
+            button.setChecked(check)
+        self.session_buttons.blockSignals(False)
+
+        self.changed.emit()

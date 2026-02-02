@@ -31,16 +31,18 @@ class ClassConfig:
     name: str
     id: int
     color: Color3f
+    session: bool
 
     @classmethod
     def from_dict(cls, data: dict) -> "ClassConfig":
-        return cls(name=data["name"], id=data["id"], color=hex_to_rgb(data["color"]))
+        return cls(name=data["name"], id=data["id"], color=hex_to_rgb(data["color"]), session=data.get("session", True) )
 
     def to_dict(self) -> dict:
         return {
             "name": self.name,
             "id": self.id,
             "color": rgb_to_hex(self.color),
+            "session" : self.session
         }
 
 
@@ -61,7 +63,7 @@ class LabelConfig(object, metaclass=SingletonABCMeta):
         if class_definition_path.exists():
             with config.getpath("FILE", "class_definitions").open("r") as stream:
                 data = json.load(stream)
-
+            
             self.classes = [ClassConfig.from_dict(c) for c in data["classes"]]
             self.default = data["default"]
             self.type = LabelingMode(data["type"])

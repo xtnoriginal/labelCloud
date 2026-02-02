@@ -142,7 +142,9 @@ class PointCloudManger(object):
         assert self.pointcloud is not None
 
         for label_class in LabelConfig().classes:
-            self.view.current_class_dropdown.addItem(label_class.name)
+
+            if label_class.session:
+                self.view.current_class_dropdown.addItem(label_class.name)
 
     def get_labels_from_file(self) -> List[Union[BBox,Point]]:
         labels = self.label_manager.import_labels(self.pcd_path)

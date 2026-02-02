@@ -789,6 +789,9 @@ class GUI(QtWidgets.QMainWindow):
             export_format = LabelConfig().format
             user_name = LabelConfig().get_user_name()  # assuming you added this
 
+
+            print("Updating GUI with new class settings...", selected_classes)
+
             self.update_current_class_dropdown()
 
             print("User selected:")
